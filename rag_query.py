@@ -30,7 +30,7 @@ def _should_rebuild_index(data_dir: Path, index_path: Path, meta_path: Path) -> 
 
 
 def build_pipeline() -> RAGPipeline:
-    lmstudio_url = os.getenv("LMSTUDIO_URL", "http://192.168.100.67:1234")
+    lmstudio_url = os.getenv("LMSTUDIO_URL", "http://172.20.10.8:1234")
     model_name = os.getenv("LMSTUDIO_MODEL", "mistral")
     pipeline = RAGPipeline(lmstudio_url=lmstudio_url, model_name=model_name)
 
@@ -46,10 +46,10 @@ def build_pipeline() -> RAGPipeline:
     return pipeline
 
 
-def ask_once(query: str, top_k: int = 3) -> Dict[str, Any]:
+def ask_once(query: str, top_k: int = 6) -> Dict[str, Any]:
     pipeline = build_pipeline()
     query_vector = pipeline.embedder.embed_query(query)
-    contexts = pipeline.retriever.retrieve(query_vector, top_k=top_k)
+    contexts = pipeline.retriever.retrieve(query_vector, top_k=top_k, query_text=query)
     answer = pipeline.llm_client.generate_answer(query, contexts)
 
     sources: List[str] = []

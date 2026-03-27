@@ -15,7 +15,7 @@ Options:
   --no-install   Skip dependency installation steps.
 
 Environment overrides:
-  LMSTUDIO_URL   Default: http://127.0.0.1:1234
+  LMSTUDIO_URL   Default: http://172.20.10.8:1234
   LMSTUDIO_MODEL Default: mistral
   HOST           Default: 127.0.0.1
   PORT           Default: 8092
@@ -39,7 +39,7 @@ if [[ ! -d "$LARAVEL_DIR" ]]; then
   exit 1
 fi
 
-export LMSTUDIO_URL="${LMSTUDIO_URL:-http://127.0.0.1:1234}"
+export LMSTUDIO_URL="${LMSTUDIO_URL:-http://172.20.10.8:1234}"
 export LMSTUDIO_MODEL="${LMSTUDIO_MODEL:-mistral}"
 
 echo "[1/4] Using project root: $ROOT_DIR"

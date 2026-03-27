@@ -52,5 +52,5 @@ class RAGPipeline:
     def ask(self, query: str, top_k: int = 3) -> str:
         """Run retrieval and return generated answer."""
         query_vector = self.embedder.embed_query(query)
-        contexts = self.retriever.retrieve(query_vector, top_k=top_k)
+        contexts = self.retriever.retrieve(query_vector, top_k=top_k, query_text=query)
         return self.llm_client.generate_answer(query, contexts)

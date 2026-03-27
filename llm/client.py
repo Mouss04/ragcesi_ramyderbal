@@ -29,10 +29,15 @@ class LLMClient:
 
     def _build_context_block(self, contexts: List[Dict[str, Any]]) -> str:
         blocks: List[str] = []
-        for i, item in enumerate(contexts, start=1):
+        max_context_items = 4
+        max_chars_per_context = 900
+
+        for i, item in enumerate(contexts[:max_context_items], start=1):
             document = item.get("document", {})
             source = document.get("source", "unknown_source")
-            text = document.get("text", "")
+            text = str(document.get("text", ""))
+            if len(text) > max_chars_per_context:
+                text = text[:max_chars_per_context].rstrip() + " ..."
             blocks.append(f"[{i}] Source: {source}\n{text}")
         return "\n\n".join(blocks) if blocks else "No relevant context found."
 
