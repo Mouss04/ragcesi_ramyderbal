@@ -11,6 +11,12 @@ class RagController extends Controller
 {
     public function ask(Request $request): JsonResponse
     {
+        if (! $request->user()) {
+            return response()->json([
+                'error' => 'Authentication required.',
+            ], 401);
+        }
+
         @set_time_limit(300);
 
         $validated = $request->validate([
@@ -30,10 +36,12 @@ class RagController extends Controller
             ? $projectRoot.'/.venv/bin/python'
             : 'python3';
 
+        $question = trim($validated['question']);
+
         $process = new Process([
             $pythonExecutable,
             $scriptPath,
-            $validated['question'],
+            $question,
         ], $projectRoot);
 
         $process->setTimeout(180);
