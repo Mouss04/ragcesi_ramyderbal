@@ -25,8 +25,8 @@ class RAGPipeline:
         self.index_path = os.path.join("data", "faiss.index")
         self.meta_path = os.path.join("data", "faiss.meta.json")
 
-    def build(self) -> None:
-        """Load, clean, chunk and index documents."""
+    def build(self) -> dict[str, int]:
+        """Load, clean, chunk and index documents and return indexing stats."""
         records = self.ingestor.load_document_records()
         documents = [item["text"] for item in records]
         sources = [item["source"] for item in records]
@@ -40,6 +40,10 @@ class RAGPipeline:
         vectors = self.embedder.embed_texts(chunks)
         self.vector_store.add_embeddings(vectors, documents=chunks)
         self.vector_store.save_index(self.index_path, self.meta_path)
+        return {
+            "document_count": len(records),
+            "chunk_count": len(chunks),
+        }
 
     def load_index(self) -> None:
         """Load an existing FAISS index from local files."""

@@ -8,7 +8,11 @@ def main() -> int:
     model_name = os.getenv("LMSTUDIO_MODEL", "mistral")
 
     pipeline = RAGPipeline(lmstudio_url=lmstudio_url, model_name=model_name)
-    pipeline.build()
+    stats = pipeline.build()
+
+    print(
+        f"Indexed {stats['chunk_count']} chunks from {stats['document_count']} documents."
+    )
 
     print("Reindex completed successfully.")
     return 0

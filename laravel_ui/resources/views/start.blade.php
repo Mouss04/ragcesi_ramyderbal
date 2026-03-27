@@ -628,6 +628,7 @@
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About</a></li>
+                <li><a href="/admin/documents">Upload</a></li>
                 <li><a href="#docs">Docs</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
@@ -712,6 +713,7 @@
                 <ul>
                     <li><a href="#home" style="text-decoration: none; color: inherit;">Home</a></li>
                     <li><a href="#about" style="text-decoration: none; color: inherit;">About</a></li>
+                    <li><a href="/admin/documents" style="text-decoration: none; color: inherit;">Upload</a></li>
                     <li><a href="#docs" style="text-decoration: none; color: inherit;">Docs</a></li>
                     <li><a href="#contact" style="text-decoration: none; color: inherit;">Contact</a></li>
                 </ul>

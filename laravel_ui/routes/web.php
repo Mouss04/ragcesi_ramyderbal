@@ -26,7 +26,6 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
-        Route::post('/documents/process', [DocumentController::class, 'process'])->name('documents.process');
     });
 
     Route::middleware('role:user,admin')->group(function (): void {

@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\EnsureRole;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,5 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PostTooLargeException $exception) {
+            return back()->withErrors([
+                'file' => 'Upload failed: the file is larger than the server upload limit. Try a smaller file or increase PHP upload_max_filesize/post_max_size.',
+            ]);
+        });
     })->create();

@@ -64,4 +64,4 @@ fi
 
 echo "[4/4] Starting Laravel UI at http://$HOST:$PORT"
 echo "Open your browser and ask in the RAG box."
-exec php artisan serve --host="$HOST" --port="$PORT"
+exec php -d upload_max_filesize=50M -d post_max_size=50M artisan serve --host="$HOST" --port="$PORT"
