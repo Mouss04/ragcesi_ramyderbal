@@ -27,7 +27,7 @@ def should_rebuild_index(data_dir: Path, index_path: Path, meta_path: Path) -> b
 
 
 def main() -> None:
-    lmstudio_url = os.getenv("LMSTUDIO_URL", "http://172.20.10.8:1234")
+    lmstudio_url = os.getenv("LMSTUDIO_URL", "http://192.168.100.67:1234")
     model_name = os.getenv("LMSTUDIO_MODEL", "mistral")
     pipeline = RAGPipeline(lmstudio_url=lmstudio_url, model_name=model_name)
 
