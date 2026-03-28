@@ -109,6 +109,80 @@
     }
     .empty-state svg { opacity: 0.25; margin-bottom: 0.8rem; }
     .empty-state p { font-size: 0.9rem; }
+
+    /* ── Edit modal ── */
+    .edit-overlay {
+        display: none; position: fixed; inset: 0; z-index: 9000;
+        background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+        align-items: center; justify-content: center;
+    }
+    .edit-overlay.open { display: flex; }
+    .edit-modal {
+        background: #fff; border-radius: 20px;
+        width: min(96vw, 480px);
+        box-shadow: 0 24px 64px rgba(0,0,0,.3);
+        overflow: hidden;
+    }
+    .edit-modal-header {
+        background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+        padding: 1.2rem 1.5rem;
+        display: flex; align-items: center; gap: 1rem;
+    }
+    .edit-modal-avatar {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: rgba(255,255,255,.2); border: 2px solid rgba(255,255,255,.35);
+        display: grid; place-items: center;
+        font-size: 1rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .edit-modal-htitle { font-size: 1rem; font-weight: 800; color: #fff; }
+    .edit-modal-hsub   { font-size: .75rem; color: rgba(255,255,255,.7); margin-top: 2px; }
+    .edit-modal-close {
+        margin-left: auto; width: 32px; height: 32px; border-radius: 50%;
+        background: rgba(255,255,255,.15); border: none; cursor: pointer;
+        display: grid; place-items: center; color: #fff;
+        transition: background 140ms;
+    }
+    .edit-modal-close:hover { background: rgba(255,255,255,.28); }
+    .edit-modal-body { padding: 1.4rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .edit-field label {
+        display: block; font-size: .8rem; font-weight: 700;
+        color: #3a5858; margin-bottom: .4rem;
+    }
+    .edit-field input,
+    .edit-field select {
+        width: 100%; border: 1.5px solid #d0e2e2; border-radius: 11px;
+        padding: .62rem .9rem; font: inherit; font-size: .88rem;
+        color: #1e2c2c; background: #fafefe; outline: none;
+        transition: border-color 150ms, box-shadow 150ms;
+        box-sizing: border-box;
+    }
+    .edit-field input:focus,
+    .edit-field select:focus {
+        border-color: var(--teal);
+        box-shadow: 0 0 0 3px var(--teal-shadow);
+        background: #fff;
+    }
+    .edit-field-hint { font-size: .73rem; color: #9bb0b0; margin-top: .3rem; }
+    .edit-modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1.5px solid #edf2f2;
+        display: flex; justify-content: flex-end; gap: .7rem;
+    }
+    .edit-btn-cancel {
+        padding: .5rem 1.1rem; border-radius: 10px;
+        background: #f0f4f4; border: 1.5px solid #d0e2e2;
+        font-size: .85rem; font-weight: 600; color: #4a7070; cursor: pointer;
+    }
+    .edit-btn-cancel:hover { background: #e4ecec; }
+    .edit-btn-save {
+        padding: .5rem 1.4rem; border-radius: 10px;
+        background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+        border: none; font-size: .85rem; font-weight: 700; color: #fff;
+        cursor: pointer; box-shadow: 0 3px 10px var(--teal-shadow);
+        display: flex; align-items: center; gap: .4rem;
+        transition: opacity 140ms;
+    }
+    .edit-btn-save:hover { opacity: .88; }
 </style>
 @endpush
 
@@ -120,10 +194,10 @@
             <div class="page-header-title">Gestion des utilisateurs</div>
             <div class="page-header-sub">Créer, modifier et supprimer les comptes employés et administrateurs.</div>
         </div>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" onclick="openCreateModal()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nouvel utilisateur
-        </a>
+        </button>
     </div>
 
     {{-- Mini stats --}}
@@ -197,10 +271,12 @@
                         Depuis {{ $user->created_at?->locale('fr')->diffForHumans() }}
                     </div>
                     <div class="user-card-actions">
-                        <a class="btn btn-outline" href="{{ route('admin.users.edit', $user) }}">
+                        <button type="button" class="btn btn-outline"
+                                onclick="openEditModal({{ $user->id }}, {{ Js::from($user->name) }}, '{{ $user->role }}')"
+                                title="Modifier">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Modifier
-                        </a>
+                        </button>
                         <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');" style="flex:1;display:flex;">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger" style="flex:1;">
@@ -213,5 +289,145 @@
             @endforeach
         </div>
     @endif
+
+{{-- ── Create User Modal ── --}}
+<div class="edit-overlay" id="create-overlay" onclick="closeCreateModal(event)">
+    <div class="edit-modal">
+        <div class="edit-modal-header">
+            <div class="edit-modal-avatar" style="background:var(--teal);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <div>
+                <div class="edit-modal-htitle">Créer un utilisateur</div>
+                <div class="edit-modal-hsub">Nouveau compte employé ou administrateur</div>
+            </div>
+            <button class="edit-modal-close" type="button" onclick="closeCreateModal()" title="Fermer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('admin.users.store') }}">
+            @csrf
+            <div class="edit-modal-body">
+                <div class="edit-field">
+                    <label for="create-name">Nom d'utilisateur</label>
+                    <input type="text" id="create-name" name="name"
+                           value="{{ old('name') }}" required placeholder="Ex: jean.dupont">
+                </div>
+                <div class="edit-field">
+                    <label for="create-role">Rôle</label>
+                    <select id="create-role" name="role" required>
+                        <option value="user" {{ old('role','user') === 'user' ? 'selected' : '' }}>Employé</option>
+                        <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrateur</option>
+                    </select>
+                </div>
+                <div class="edit-field">
+                    <label for="create-password">Mot de passe</label>
+                    <input type="password" id="create-password" name="password"
+                           required placeholder="Minimum 8 caractères">
+                    <div class="edit-field-hint">Minimum 8 caractères</div>
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button type="button" class="edit-btn-cancel" onclick="closeCreateModal()">Annuler</button>
+                <button type="submit" class="edit-btn-save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Créer le compte
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── Edit User Modal ── --}}
+<div class="edit-overlay" id="edit-overlay" onclick="closeEditModal(event)">
+    <div class="edit-modal">
+        <div class="edit-modal-header">
+            <div class="edit-modal-avatar" id="modal-avatar"></div>
+            <div>
+                <div class="edit-modal-htitle">Modifier l'utilisateur</div>
+                <div class="edit-modal-hsub" id="modal-subtitle">Modifier les informations du compte</div>
+            </div>
+            <button class="edit-modal-close" type="button" onclick="closeEditModal()" title="Fermer">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <form id="edit-form" method="POST" action="">
+            @csrf
+            @method('PUT')
+            <div class="edit-modal-body">
+                <div class="edit-field">
+                    <label for="modal-name">Nom d'utilisateur</label>
+                    <input type="text" id="modal-name" name="name" required placeholder="Nom d'affichage">
+                </div>
+                <div class="edit-field">
+                    <label for="modal-role">Rôle</label>
+                    <select id="modal-role" name="role" required>
+                        <option value="user">Employé</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                <div class="edit-field">
+                    <label for="modal-password">Nouveau mot de passe <span style="color:#9bb0b0;font-weight:500;">(optionnel)</span></label>
+                    <input type="password" id="modal-password" name="password" placeholder="Laisser vide pour ne pas changer">
+                    <div class="edit-field-hint">Minimum 8 caractères</div>
+                </div>
+            </div>
+            <div class="edit-modal-footer">
+                <button type="button" class="edit-btn-cancel" onclick="closeEditModal()">Annuler</button>
+                <button type="submit" class="edit-btn-save">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function openCreateModal() {
+    document.getElementById('create-overlay').classList.add('open');
+    document.getElementById('create-name').focus();
+}
+
+function closeCreateModal(e) {
+    if (e && e.target !== document.getElementById('create-overlay')) return;
+    document.getElementById('create-overlay').classList.remove('open');
+}
+
+const EDIT_ROUTE_BASE = '{{ url('admin/users') }}';
+const COLORS = ['#0c7070','#6366f1','#d4a017','#e11d48','#0891b2','#16a34a'];
+
+function openEditModal(id, name, role) {
+    const initials = name.split(' ').map(w => (w[0] || '').toUpperCase()).slice(0,2).join('');
+    const bg       = COLORS[id % COLORS.length];
+
+    document.getElementById('modal-avatar').textContent = initials;
+    document.getElementById('modal-avatar').style.background = bg;
+    document.getElementById('modal-subtitle').textContent = 'Compte #' + id + ' — ' + name;
+    document.getElementById('modal-name').value = name;
+    document.getElementById('modal-role').value = role;
+    document.getElementById('modal-password').value = '';
+    document.getElementById('edit-form').action = EDIT_ROUTE_BASE + '/' + id;
+    document.getElementById('edit-overlay').classList.add('open');
+    document.getElementById('modal-name').focus();
+}
+
+function closeEditModal(e) {
+    // close only if clicking outside the modal box, or called directly
+    if (e && e.target !== document.getElementById('edit-overlay')) return;
+    document.getElementById('edit-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.getElementById('edit-overlay').classList.remove('open');
+        document.getElementById('create-overlay').classList.remove('open');
+    }
+});
+</script>
+@endpush
 
 @endsection

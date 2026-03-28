@@ -1009,12 +1009,13 @@ function checkStrength(val) {
     document.getElementById('pw-strength-label').style.color = colors[score - 1] || colors[0];
 }
 
-/* ── Live clock ── */
+/* ── Live clock (respects the user's saved timezone) ── */
+const SETTINGS_TZ = '{{ auth()->user()->timezone ?? 'Africa/Algiers' }}';
 function updateClock() {
-    const now = new Date();
-    const hm  = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    const sec = String(now.getSeconds()).padStart(2,'0');
-    const dow = now.toLocaleDateString('fr-FR', {weekday:'long'});
+    const now  = new Date(new Date().toLocaleString('en-US', { timeZone: SETTINGS_TZ }));
+    const hm   = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    const sec  = String(now.getSeconds()).padStart(2,'0');
+    const dow  = now.toLocaleDateString('fr-FR', {weekday:'long'});
     const full = now.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'});
     document.getElementById('live-hm').textContent = hm;
     document.getElementById('live-sec').textContent = sec;

@@ -137,13 +137,13 @@
                 <div class="profile-role">{{ ucfirst(auth()->user()->role) }}</div>
                 <div class="profile-loc">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                    Alger
+                    {{ last(explode('/', auth()->user()->timezone ?? 'Africa/Algiers')) }}
                 </div>
             </div>
         </div>
         <div class="profile-date">
-            {{ \Carbon\Carbon::now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}<br>
-            <span style="font-size:1.1rem;font-weight:700;color:#fff;">{{ \Carbon\Carbon::now()->format('H:mm') }}</span>
+            <span id="dash-date"></span><br>
+            <span id="dash-time" style="font-size:1.1rem;font-weight:700;color:#fff;"></span>
         </div>
     </div>
 
@@ -244,6 +244,36 @@
         <img src="{{ asset('bagroung_logo.png') }}" alt="" aria-hidden="true"
              style="width:550px;height:auto;opacity:0.13;pointer-events:none;user-select:none;display:block;">
     </div>
+
+@push('scripts')
+<script>
+(function() {
+    const TZ = '{{ auth()->user()->timezone ?? 'Africa/Algiers' }}';
+    const DAYS   = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+    const MONTHS = ['janvier','février','mars','avril','mai','juin',
+                    'juillet','août','septembre','octobre','novembre','décembre'];
+
+    function updateDashClock() {
+        const now  = new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
+        const day  = DAYS[now.getDay()];
+        const date = now.getDate();
+        const mon  = MONTHS[now.getMonth()];
+        const yr   = now.getFullYear();
+        const hh   = String(now.getHours()).padStart(2,'0');
+        const mm   = String(now.getMinutes()).padStart(2,'0');
+        const ss   = String(now.getSeconds()).padStart(2,'0');
+
+        const dateEl = document.getElementById('dash-date');
+        const timeEl = document.getElementById('dash-time');
+        if (dateEl) dateEl.textContent = day + ' ' + date + ' ' + mon + ' ' + yr;
+        if (timeEl) timeEl.textContent = hh + ':' + mm + ':' + ss;
+    }
+
+    updateDashClock();
+    setInterval(updateDashClock, 1000);
+})();
+</script>
+@endpush
 
 @endsection
 
