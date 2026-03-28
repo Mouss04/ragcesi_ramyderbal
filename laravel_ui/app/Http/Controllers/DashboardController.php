@@ -21,8 +21,9 @@ class DashboardController extends Controller
     public function admin(): View
     {
         return view('admin.dashboard', [
-            'usersCount' => User::query()->count(),
-            'documentsCount' => Document::query()->count(),
+            'usersCount'        => User::query()->count(),
+            'documentsCount'    => Document::query()->count(),
+            'todayQueriesCount' => 0,
         ]);
     }
 

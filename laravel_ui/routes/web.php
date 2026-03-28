@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\DocumentController;
+use App\Http\Controllers\Admin\RagAdminController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
@@ -26,6 +28,15 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
+        Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+        Route::post('/settings/company',  [SettingsController::class, 'updateCompany'])->name('settings.company');
+        Route::post('/settings/datetime', [SettingsController::class, 'updateDatetime'])->name('settings.datetime');
+
+        Route::get('/rag',  [RagAdminController::class, 'index'])->name('rag');
+        Route::post('/rag', [RagAdminController::class, 'ask'])->name('rag.ask');
     });
 
     Route::middleware('role:user,admin')->group(function (): void {
