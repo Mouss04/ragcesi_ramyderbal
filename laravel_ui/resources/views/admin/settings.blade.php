@@ -532,6 +532,7 @@
         <div class="snav-divider"></div>
         <div class="snav-label">Personnalisation</div>
 
+        @if(auth()->user()->role === 'admin')
         <button class="snav-item" data-tab="company" onclick="switchTab('company',this)" type="button">
             <div class="snav-icon" style="background:#f0f0ff;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
@@ -541,6 +542,7 @@
                 <span class="snav-desc">Logo & couleurs</span>
             </div>
         </button>
+        @endif
 
         <button class="snav-item" data-tab="datetime" onclick="switchTab('datetime',this)" type="button">
             <div class="snav-icon" style="background:#ecfdf5;">
@@ -698,7 +700,8 @@
             </div>
         </div>
 
-        {{-- ═══════ COMPANY & THEME ═══════ --}}
+        {{-- ═══════ COMPANY & THEME — admin only ═══════ --}}
+        @if(auth()->user()->role === 'admin')
         <div class="settings-panel" id="panel-company">
             <div class="scard">
                 <div class="scard-head indigo">
@@ -717,7 +720,7 @@
                         <div class="form-group">
                             <label for="company_name">Nom de l'entreprise</label>
                             <input type="text" id="company_name" name="company_name"
-                                   value="{{ old('company_name', auth()->user()->company_name) }}"
+                                   value="{{ old('company_name', $siteSetting->company_name) }}"
                                    placeholder="Ex: Acme Corp">
                         </div>
 
@@ -727,8 +730,8 @@
                             {{-- visual drop zone (clicking it triggers the hidden input below) --}}
                             <div class="logo-drop" id="logo-drop-area" onclick="document.getElementById('company_logo').click()" style="cursor:pointer;">
                                 <div id="logo-drop-content">
-                                    @if(auth()->user()->company_logo)
-                                        <img src="{{ Storage::url(auth()->user()->company_logo) }}" style="max-height:70px;max-width:100%;object-fit:contain;border-radius:6px;" alt="logo">
+                                    @if($siteSetting->company_logo)
+                                        <img src="{{ Storage::url($siteSetting->company_logo) }}" style="max-height:70px;max-width:100%;object-fit:contain;border-radius:6px;" alt="logo">
                                     @else
                                         <div class="logo-drop-icon">
                                             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -746,7 +749,7 @@
                         <div class="form-group">
                             <label>Couleur principale</label>
                             <div class="color-grid" id="color-grid">
-                                @php $currentColor = old('theme_color', auth()->user()->theme_color ?? '#0c7070'); @endphp
+                                @php $currentColor = old('theme_color', $siteSetting->theme_color ?? '#0c7070'); @endphp
                                 @foreach(['#0c7070','#6366f1','#e11d48','#d4a017','#0891b2','#16a34a','#7c3aed','#ea580c'] as $c)
                                     <div class="cswatch {{ $currentColor === $c ? 'chosen' : '' }}"
                                          style="background:{{ $c }};"
@@ -793,6 +796,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         {{-- ═══════ DATE & TIME ═══════ --}}
         <div class="settings-panel" id="panel-datetime">

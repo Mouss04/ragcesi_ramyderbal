@@ -6,9 +6,13 @@ use App\Models\Scopes\CompanyScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Document extends Model
+class RagHistory extends Model
 {
-    protected $fillable = ['title', 'file_path', 'company_id'];
+    protected $fillable = ['user_id', 'company_id', 'chat_session_id', 'question', 'answer', 'sources'];
+
+    protected $casts = [
+        'sources' => 'array',
+    ];
 
     protected static function booted(): void
     {
@@ -21,6 +25,11 @@ class Document extends Model
                 $model->company_id = auth()->user()->company_id;
             }
         });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function company(): BelongsTo

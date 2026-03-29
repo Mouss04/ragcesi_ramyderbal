@@ -62,27 +62,27 @@ class SettingsController extends Controller
 
     public function updateCompany(Request $request): RedirectResponse
     {
-        $user = auth()->user();
-
         $request->validate([
             'company_name' => ['nullable', 'string', 'max:100'],
             'company_logo' => ['nullable', 'image', 'max:4096'],
             'theme_color'  => ['nullable', 'string', 'max:20'],
         ]);
 
+        $company = auth()->user()->company;
+
         $data = [
-            'company_name' => $request->company_name,
-            'theme_color'  => $request->theme_color ?? '#0c7070',
+            'name'        => $request->company_name ?? $company->name,
+            'theme_color' => $request->theme_color ?? '#0c7070',
         ];
 
         if ($request->hasFile('company_logo')) {
-            if ($user->company_logo) {
-                Storage::disk('public')->delete($user->company_logo);
+            if ($company->logo) {
+                Storage::disk('public')->delete($company->logo);
             }
-            $data['company_logo'] = $request->file('company_logo')->store('logos', 'public');
+            $data['logo'] = $request->file('company_logo')->store('logos', 'public');
         }
 
-        $user->update($data);
+        $company->update($data);
 
         return back()->with('status', 'Paramètres entreprise mis à jour.');
     }

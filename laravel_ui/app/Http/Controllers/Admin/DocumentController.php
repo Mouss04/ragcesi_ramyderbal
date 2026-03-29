@@ -131,7 +131,7 @@ class DocumentController extends Controller
 
             Document::query()->firstOrCreate(
                 ['file_path' => $relativePath],
-                ['title' => Str::headline(pathinfo($filename, PATHINFO_FILENAME))]
+                ['title' => Str::headline(pathinfo($filename, PATHINFO_FILENAME)), 'company_id' => auth()->user()?->company_id]
             );
         }
     }

@@ -18,10 +18,15 @@
             </div>
             <div>
                 <label for="role">Role</label>
+                @if($user->role === 'admin' || $user->id === auth()->id())
+                    <input type="text" value="{{ ucfirst($user->role === 'user' ? 'Employé' : ucfirst($user->role)) }}" disabled style="background:#f3f4f6;color:#6b7280;cursor:not-allowed;">
+                    <input type="hidden" name="role" value="{{ $user->role }}">
+                @else
                 <select id="role" name="role" required>
                     <option value="user" @selected(old('role', $user->role) === 'user')>Normal User</option>
-                    <option value="admin" @selected(old('role', $user->role) === 'admin')>Admin</option>
+                    <option value="supervisor" @selected(old('role', $user->role) === 'supervisor')>Supervisor</option>
                 </select>
+                @endif
             </div>
             <div style="display: flex; gap: 0.6rem;">
                 <button type="submit" class="btn btn-primary">Update</button>

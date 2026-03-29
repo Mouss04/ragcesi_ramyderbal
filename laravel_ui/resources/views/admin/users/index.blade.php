@@ -90,8 +90,9 @@
         font-size: 0.72rem;
         font-weight: 700;
     }
-    .badge-admin  { background: #fef3c7; color: #92400e; }
-    .badge-user   { background: #e6f4f4; color: #0c7070; }
+    .badge-admin       { background: #fef3c7; color: #92400e; }
+    .badge-supervisor  { background: #ede9fe; color: #5b21b6; }
+    .badge-user        { background: #e6f4f4; color: #0c7070; }
     .user-card-date { font-size: 0.72rem; color: #9bb0b0; }
     .user-card-actions {
         display: flex;
@@ -183,6 +184,32 @@
         transition: opacity 140ms;
     }
     .edit-btn-save:hover { opacity: .88; }
+
+    /* ── Avatar mini-drop ── */
+    .modal-avatar-drop {
+        display: flex; align-items: center; gap: 1rem;
+        padding: .8rem;
+        border: 2px dashed #c0d8d8;
+        border-radius: 12px;
+        cursor: pointer;
+        background: #fafefe;
+        transition: border-color 140ms, background 140ms;
+        position: relative;
+    }
+    .modal-avatar-drop:hover { border-color: var(--teal); background: var(--teal-soft); }
+    .modal-avatar-drop input[type=file] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .modal-av-preview {
+        width: 52px; height: 52px; border-radius: 50%;
+        object-fit: cover; flex-shrink: 0;
+        display: grid; place-items: center;
+        font-size: 1.1rem; font-weight: 800; color: #fff;
+        overflow: hidden;
+    }
+    .modal-av-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .modal-av-info-title { font-size: .82rem; font-weight: 700; color: #2a4848; }
+    .modal-av-info-sub   { font-size: .73rem; color: #7a9898; margin-top: 2px; }
 </style>
 @endpush
 
@@ -226,14 +253,15 @@
             </div>
         </div>
         <div class="user-stat">
-            <div class="user-stat-icon" style="background:#f0f0ff;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                <div class="user-stat-icon" style="background:#ede9fe;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b21b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
                 </svg>
             </div>
             <div>
-                <div class="user-stat-val">{{ $users->where('role','user')->count() }}</div>
-                <div class="user-stat-label">Employés</div>
+                <div class="user-stat-val">{{ $users->where('role','supervisor')->count() }}</div>
+                <div class="user-stat-label">Superviseurs</div>
             </div>
         </div>
     </div>
@@ -248,31 +276,47 @@
         <div class="user-grid">
             @foreach($users as $user)
                 @php
-                    $isAdmin = $user->role === 'admin';
+                    $isAdmin      = $user->role === 'admin';
+                    $isSupervisor = $user->role === 'supervisor';
                     $colors  = ['#0c7070','#6366f1','#d4a017','#e11d48','#0891b2','#16a34a'];
                     $bg      = $colors[$user->id % count($colors)];
                     $initials = collect(explode(' ', $user->name))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->implode('');
+                    $stripe = $isAdmin ? 'linear-gradient(90deg,#d4a017,#f5cb5c)' : ($isSupervisor ? 'linear-gradient(90deg,#7c3aed,#a78bfa)' : 'linear-gradient(90deg,#0c7070,#14a8a8)');
                 @endphp
                 <div class="user-card">
-                    <div class="user-card-stripe" style="background: {{ $isAdmin ? 'linear-gradient(90deg,#d4a017,#f5cb5c)' : 'linear-gradient(90deg,#0c7070,#14a8a8)' }};"></div>
-                    <div class="user-card-avatar" style="background: {{ $bg }};">{{ $initials }}</div>
+                    <div class="user-card-stripe" style="background: {{ $stripe }};"></div>
+                <div class="user-card-avatar" style="background: {{ $bg }}; {{ $user->avatar ? 'padding:0;overflow:hidden;' : '' }}">
+                    @if($user->avatar)
+                        <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}" style="width:100%;height:100%;object-fit:cover;">
+                    @else
+                        {{ $initials }}
+                    @endif
+                </div>
                     <div class="user-card-name">{{ $user->name }}</div>
                     <div class="user-card-id">#{{ $user->id }}</div>
-                    <span class="user-card-badge {{ $isAdmin ? 'badge-admin' : 'badge-user' }}">
-                        @if($isAdmin)
+                    @if($isAdmin)
+                        <span class="user-card-badge badge-admin">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             Admin
-                        @else
+                        </span>
+                    @elseif($isSupervisor)
+                        <span class="user-card-badge badge-supervisor">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                            Superviseur
+                        </span>
+                    @else
+                        <span class="user-card-badge badge-user">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             Employé
-                        @endif
-                    </span>
+                        </span>
+                    @endif
                     <div class="user-card-date">
                         Depuis {{ $user->created_at?->locale('fr')->diffForHumans() }}
                     </div>
                     <div class="user-card-actions">
+                        @unless(auth()->user()->role === 'supervisor' && $user->role === 'admin')
                         <button type="button" class="btn btn-outline"
-                                onclick="openEditModal({{ $user->id }}, {{ Js::from($user->name) }}, '{{ $user->role }}')"
+                                onclick="openEditModal({{ $user->id }}, {{ Js::from($user->name) }}, '{{ $user->role }}', {{ Js::from($user->avatar ? Storage::url($user->avatar) : '') }})"
                                 title="Modifier">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Modifier
@@ -284,6 +328,7 @@
                                 Supprimer
                             </button>
                         </form>
+                        @endunless
                     </div>
                 </div>
             @endforeach
@@ -306,9 +351,26 @@
             </button>
         </div>
 
-        <form method="POST" action="{{ route('admin.users.store') }}">
+        <form method="POST" action="{{ route('admin.users.store') }}" enctype="multipart/form-data">
             @csrf
             <div class="edit-modal-body">
+                {{-- Avatar upload --}}
+                <div class="edit-field">
+                    <label>Photo de profil <span style="color:#9bb0b0;font-weight:500;">(optionnelle)</span></label>
+                    <div class="modal-avatar-drop" onclick="document.getElementById('create-avatar-input').click()">
+                        <input type="file" id="create-avatar-input" name="avatar" accept="image/*"
+                               onchange="previewModalAvatar(this,'create-av-preview')">
+                        <div class="modal-av-preview" id="create-av-preview" style="background:var(--teal);">
+                            <span id="create-av-initials">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            </span>
+                        </div>
+                        <div>
+                            <div class="modal-av-info-title">Choisir une photo</div>
+                            <div class="modal-av-info-sub">JPG, PNG · max 2 Mo</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="edit-field">
                     <label for="create-name">Nom d'utilisateur</label>
                     <input type="text" id="create-name" name="name"
@@ -318,7 +380,10 @@
                     <label for="create-role">Rôle</label>
                     <select id="create-role" name="role" required>
                         <option value="user" {{ old('role','user') === 'user' ? 'selected' : '' }}>Employé</option>
+                        <option value="supervisor" {{ old('role') === 'supervisor' ? 'selected' : '' }}>Superviseur</option>
+                        @if(auth()->user()->role === 'admin')
                         <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrateur</option>
+                        @endif
                     </select>
                 </div>
                 <div class="edit-field">
@@ -353,10 +418,25 @@
             </button>
         </div>
 
-        <form id="edit-form" method="POST" action="">
+        <form id="edit-form" method="POST" action="" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="edit-modal-body">
+                {{-- Avatar upload --}}
+                <div class="edit-field">
+                    <label>Photo de profil <span style="color:#9bb0b0;font-weight:500;">(optionnelle)</span></label>
+                    <div class="modal-avatar-drop" onclick="document.getElementById('edit-avatar-input').click()">
+                        <input type="file" id="edit-avatar-input" name="avatar" accept="image/*"
+                               onchange="previewModalAvatar(this,'edit-av-preview')">
+                        <div class="modal-av-preview" id="edit-av-preview" style="background:#6366f1;">
+                            <span id="edit-av-initials"></span>
+                        </div>
+                        <div>
+                            <div class="modal-av-info-title">Changer la photo</div>
+                            <div class="modal-av-info-sub">JPG, PNG · max 2 Mo</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="edit-field">
                     <label for="modal-name">Nom d'utilisateur</label>
                     <input type="text" id="modal-name" name="name" required placeholder="Nom d'affichage">
@@ -365,7 +445,10 @@
                     <label for="modal-role">Rôle</label>
                     <select id="modal-role" name="role" required>
                         <option value="user">Employé</option>
+                        <option value="supervisor">Superviseur</option>
+                        @if(auth()->user()->role === 'admin')
                         <option value="admin">Administrateur</option>
+                        @endif
                     </select>
                 </div>
                 <div class="edit-field">
@@ -387,7 +470,19 @@
 
 @push('scripts')
 <script>
+function previewModalAvatar(input, previewId) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(previewId).innerHTML = '<img src="' + e.target.result + '" alt="avatar">';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
 function openCreateModal() {
+    const prev = document.getElementById('create-av-preview');
+    prev.innerHTML = '<span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></span>';
+    document.getElementById('create-avatar-input').value = '';
     document.getElementById('create-overlay').classList.add('open');
     document.getElementById('create-name').focus();
 }
@@ -400,13 +495,21 @@ function closeCreateModal(e) {
 const EDIT_ROUTE_BASE = '{{ url('admin/users') }}';
 const COLORS = ['#0c7070','#6366f1','#d4a017','#e11d48','#0891b2','#16a34a'];
 
-function openEditModal(id, name, role) {
+function openEditModal(id, name, role, avatarUrl) {
     const initials = name.split(' ').map(w => (w[0] || '').toUpperCase()).slice(0,2).join('');
     const bg       = COLORS[id % COLORS.length];
 
     document.getElementById('modal-avatar').textContent = initials;
     document.getElementById('modal-avatar').style.background = bg;
     document.getElementById('modal-subtitle').textContent = 'Compte #' + id + ' — ' + name;
+
+    const prev = document.getElementById('edit-av-preview');
+    prev.style.background = bg;
+    prev.innerHTML = avatarUrl
+        ? '<img src="' + avatarUrl + '" alt="avatar">'
+        : '<span style="font-size:1.1rem;font-weight:800;color:#fff;">' + initials + '</span>';
+    document.getElementById('edit-avatar-input').value = '';
+
     document.getElementById('modal-name').value = name;
     document.getElementById('modal-role').value = role;
     document.getElementById('modal-password').value = '';
@@ -416,7 +519,6 @@ function openEditModal(id, name, role) {
 }
 
 function closeEditModal(e) {
-    // close only if clicking outside the modal box, or called directly
     if (e && e.target !== document.getElementById('edit-overlay')) return;
     document.getElementById('edit-overlay').classList.remove('open');
 }

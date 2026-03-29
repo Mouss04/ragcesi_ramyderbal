@@ -17,9 +17,5 @@
             </div>
             <button type="submit" class="btn btn-primary">Sign in</button>
         </form>
-
-        <p class="subtitle" style="margin-top: 1rem;">
-            No account? <a href="{{ route('register') }}">Create one</a>.
-        </p>
     </section>
 @endsection

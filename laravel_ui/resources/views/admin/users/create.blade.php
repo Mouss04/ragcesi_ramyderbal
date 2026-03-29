@@ -19,7 +19,10 @@
                 <label for="role">Role</label>
                 <select id="role" name="role" required>
                     <option value="user" @selected(old('role') === 'user')>Normal User</option>
+                    <option value="supervisor" @selected(old('role') === 'supervisor')>Supervisor</option>
+                    @if(auth()->user()->role === 'admin')
                     <option value="admin" @selected(old('role') === 'admin')>Admin</option>
+                    @endif
                 </select>
             </div>
             <div style="display: flex; gap: 0.6rem;">

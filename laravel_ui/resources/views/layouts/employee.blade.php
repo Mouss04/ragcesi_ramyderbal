@@ -4,27 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Witrack — Admin' }}</title>
+    <title>{{ $title ?? ($siteSetting->company_name ? $siteSetting->company_name . ' — Espace Employé' : 'Witrack — Espace Employé') }}</title>
 
     @php
-        /* ── Dynamic theme color (set globally by admin) ── */
         $theme = $siteSetting->theme_color ?? '#0c7070';
         [$tr, $tg, $tb] = sscanf(ltrim($theme, '#'), "%02x%02x%02x");
         $tr = $tr ?? 12; $tg = $tg ?? 112; $tb = $tb ?? 112;
-        $themeDark = sprintf('#%02x%02x%02x', (int)($tr*.60), (int)($tg*.60), (int)($tb*.60));
-        $themeSoft = sprintf('#%02x%02x%02x',
-            min(255, (int)(246 + $tr*.038)),
-            min(255, (int)(246 + $tg*.038)),
-            min(255, (int)(246 + $tb*.038))
-        );
-        $sidebarBg = sprintf('#%02x%02x%02x',
-            max(5,  (int)($tr*.33)),
-            max(12, (int)($tg*.43)),
-            max(12, (int)($tb*.43))
-        );
-    /* lighter shades for gradients */
-    $themeMid   = sprintf('#%02x%02x%02x', min(255,(int)($tr*1.4)), min(255,(int)($tg*1.4)), min(255,(int)($tb*1.4)));
-    $themeLight = sprintf('#%02x%02x%02x', min(255,(int)($tr*1.85)), min(255,(int)($tg*1.85)), min(255,(int)($tb*1.85)));
+        $themeDark  = sprintf('#%02x%02x%02x', (int)($tr*.60), (int)($tg*.60), (int)($tb*.60));
+        $themeSoft  = sprintf('#%02x%02x%02x',
+            min(255,(int)(246+$tr*.038)), min(255,(int)(246+$tg*.038)), min(255,(int)(246+$tb*.038)));
+        $sidebarBg  = sprintf('#%02x%02x%02x', max(5,(int)($tr*.33)), max(12,(int)($tg*.43)), max(12,(int)($tb*.43)));
+        $themeMid   = sprintf('#%02x%02x%02x', min(255,(int)($tr*1.4)), min(255,(int)($tg*1.4)), min(255,(int)($tb*1.4)));
+        $themeLight = sprintf('#%02x%02x%02x', min(255,(int)($tr*1.85)), min(255,(int)($tg*1.85)), min(255,(int)($tb*1.85)));
     @endphp
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +36,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             color: var(--text);
             background: var(--bg);
             min-height: 100vh;
@@ -56,7 +47,7 @@
         .sidebar {
             width: var(--sidebar-w);
             min-height: 100vh;
-            background: #0f3535;
+            background: {{ $sidebarBg }};
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
@@ -65,7 +56,6 @@
             overflow: hidden;
         }
 
-        /* decorative glow behind logo */
         .sidebar::before {
             content: '';
             position: absolute;
@@ -85,7 +75,6 @@
             position: relative;
         }
 
-        /* invert the dark parts of the logo to white */
         .sidebar-logo img { filter: brightness(0) invert(1); }
 
         .sidebar-nav {
@@ -97,6 +86,7 @@
             overflow-y: auto;
         }
         .sidebar-nav::-webkit-scrollbar { width: 0; }
+        .sidebar-nav { scrollbar-width: none; }
 
         .nav-section-label {
             font-size: 0.65rem;
@@ -133,7 +123,7 @@
             color: #fff;
             font-weight: 600;
         }
-        /* left accent bar on active */
+
         .nav-item.active::before {
             content: '';
             position: absolute;
@@ -163,6 +153,7 @@
             display: grid;
             place-items: center;
             flex-shrink: 0;
+            overflow: hidden;
         }
         .sidebar-user-name { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.85); }
         .sidebar-user-role { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
@@ -179,7 +170,7 @@
         /* ── Top bar ── */
         .topbar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
             padding: 0.9rem 1.6rem;
             background: var(--white);
@@ -193,8 +184,7 @@
         }
 
         .avatar {
-            width: 38px;
-            height: 38px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             background: var(--line);
             display: grid;
@@ -202,7 +192,6 @@
             flex-shrink: 0;
             overflow: hidden;
         }
-        .avatar svg { opacity: 0.45; }
 
         .user-meta { text-align: right; line-height: 1.3; }
         .user-name  { display: block; font-weight: 700; font-size: 0.9rem; }
@@ -291,12 +280,8 @@
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background: var(--teal); color: #fff; }
         .btn-primary:hover { background: var(--teal-dark); }
-        .btn-outline {
-            border-color: var(--line);
-            color: var(--text);
-            background: #fff;
-        }
-        .btn-danger { background: #dc2626; color: #fff; }
+        .btn-outline { border-color: var(--line); color: var(--text); background: #fff; }
+        .btn-danger   { background: #dc2626; color: #fff; }
 
         label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.88rem; }
 
@@ -315,19 +300,6 @@
         input:focus, select:focus, textarea:focus { border-color: var(--teal); }
         textarea { min-height: 110px; resize: vertical; }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.88rem;
-        }
-        th, td {
-            text-align: left;
-            padding: 0.65rem 0.8rem;
-            border-bottom: 1px solid var(--line);
-        }
-        th { background: #f6fafa; font-weight: 700; font-size: 0.82rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        tr:last-child td { border-bottom: none; }
-
         .pill {
             display: inline-block;
             padding: 0.15rem 0.55rem;
@@ -337,39 +309,11 @@
             background: var(--teal-soft);
             color: var(--teal-dark);
         }
-        .pill.admin { background: #fef3c7; color: #92400e; }
 
         @media (max-width: 840px) {
             .sidebar { transform: translateX(-100%); }
             .main-wrapper { margin-left: 0; }
             .cols-2, .cols-3 { grid-template-columns: 1fr; }
-        }
-    </style>
-
-    {{-- Dynamic theme overrides --}}
-    <style>
-        .sidebar {
-            background: {{ $sidebarBg }};
-        }
-        .sidebar::before {
-            background: radial-gradient(circle, rgba({{ $tr }},{{ $tg }},{{ $tb }},0.18) 0%, transparent 70%);
-        }
-        .nav-item.active {
-            background: linear-gradient(90deg,
-                rgba({{ $tr }},{{ $tg }},{{ $tb }},0.35),
-                rgba({{ $tr }},{{ $tg }},{{ $tb }},0.10)) !important;
-        }
-        .nav-item.active::before {
-            background: {{ $theme }};
-        }
-        .nav-item:hover {
-            background: rgba({{ $tr }},{{ $tg }},{{ $tb }},0.12);
-        }
-        .sidebar-user-avatar {
-            background: rgba({{ $tr }},{{ $tg }},{{ $tb }},0.35);
-        }
-        .topbar-company-dot {
-            background: {{ $theme }};
         }
     </style>
 
@@ -382,48 +326,31 @@
     <div class="sidebar-logo">
         @if($siteSetting->company_logo)
             <img src="{{ Storage::url($siteSetting->company_logo) }}" alt="{{ $siteSetting->company_name ?? 'Logo' }}"
-                 style="max-height:46px;max-width:150px;object-fit:contain;display:block;">
+                 style="max-height:46px;max-width:150px;object-fit:contain;display:block;filter:brightness(0) invert(1);">
         @else
             <img src="{{ asset('logo_witrack.png') }}" alt="{{ $siteSetting->company_name ?? 'Witrack' }}"
-                 style="width:100%;max-width:150px;height:auto;display:block;filter:brightness(0) invert(1);">
+                 style="width:100%;max-width:150px;height:auto;display:block;">
         @endif
     </div>
 
     <nav class="sidebar-nav">
 
-        {{-- Main --}}
+        {{-- Principal --}}
         <span class="nav-section-label">Principal</span>
-
-        <a href="{{ route('admin.dashboard') }}"
-           class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            Accueil
-        </a>
 
         <a href="{{ route('employee.dashboard') }}"
            class="nav-item {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
-            Assistant IA
+            Accueil
         </a>
 
-        {{-- Management --}}
-        <span class="nav-section-label" style="margin-top:0.4rem;">Gestion</span>
+        {{-- Documents & Historique --}}
+        <span class="nav-section-label" style="margin-top:0.4rem;">Contenu</span>
 
-        <a href="{{ route('admin.users.index') }}"
-           class="nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-            </svg>
-            Utilisateurs
-        </a>
-
-        <a href="{{ route('admin.documents.index') }}"
-           class="nav-item {{ request()->routeIs('admin.documents.*') ? 'active' : '' }}">
+        <a href="{{ route('employee.documents') }}"
+           class="nav-item {{ request()->routeIs('employee.documents') ? 'active' : '' }}">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
                 <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
@@ -431,28 +358,19 @@
             Documents
         </a>
 
-        {{-- Analytics --}}
-        <span class="nav-section-label" style="margin-top:0.4rem;">Analyse</span>
-
-        <a href="{{ route('employee.history') }}" class="nav-item {{ request()->routeIs('employee.history') ? 'active' : '' }}">
+        <a href="{{ route('employee.history') }}"
+           class="nav-item {{ request()->routeIs('employee.history') ? 'active' : '' }}">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
             Historique
         </a>
 
-        <a href="#" class="nav-item">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            Statistiques
-        </a>
-
-        {{-- Config --}}
+        {{-- Configuration --}}
         <span class="nav-section-label" style="margin-top:0.4rem;">Configuration</span>
 
-        <a href="{{ route('admin.settings') }}" class="nav-item {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
+        <a href="{{ route('employee.settings') }}"
+           class="nav-item {{ request()->routeIs('employee.settings*') ? 'active' : '' }}">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"/>
                 <path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/>
@@ -466,7 +384,7 @@
     {{-- Bottom user strip --}}
     <div class="sidebar-footer">
         <div class="sidebar-user">
-            <div class="sidebar-user-avatar" style="overflow:hidden;">
+            <div class="sidebar-user-avatar">
                 @if(auth()->user()->avatar)
                     <img src="{{ Storage::url(auth()->user()->avatar) }}" alt="avatar" style="width:100%;height:100%;object-fit:cover;">
                 @else
@@ -475,7 +393,7 @@
             </div>
             <div style="overflow:hidden;">
                 <div class="sidebar-user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</div>
-                <div class="sidebar-user-role">{{ ucfirst(auth()->user()->role) }}</div>
+                <div class="sidebar-user-role">Employé</div>
             </div>
         </div>
     </div>
@@ -483,8 +401,7 @@
 
 {{-- ── Main ──────────────────────────────────── --}}
 <div class="main-wrapper">
-    <header class="topbar" style="justify-content:space-between;">
-
+    <header class="topbar">
         <span style="font-size:.78rem;color:#9bb0b0;font-weight:500;">
             Propulsé par <strong style="color:var(--teal);font-weight:700;">Witrack</strong>
         </span>
@@ -492,7 +409,7 @@
         <div class="user-chip">
             <div class="user-meta">
                 <span class="user-name">{{ auth()->user()->name }}</span>
-                <span class="user-role">{{ ucfirst(auth()->user()->role) }}</span>
+                <span class="user-role">Employé</span>
             </div>
             <div class="avatar" style="border:2px solid var(--line);">
                 @if(auth()->user()->avatar)
@@ -503,7 +420,10 @@
             </div>
             <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                 @csrf
-                <button type="submit" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:9px;border:1px solid var(--line);background:#fff;font:inherit;font-size:0.84rem;font-weight:600;color:var(--text);cursor:pointer;transition:140ms ease;" onmouseover="this.style.borderColor='#dc2626';this.style.color='#dc2626';" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text)';">
+                <button type="submit"
+                    style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.85rem;border-radius:9px;border:1px solid var(--line);background:#fff;font:inherit;font-size:0.84rem;font-weight:600;color:var(--text);cursor:pointer;transition:140ms ease;"
+                    onmouseover="this.style.borderColor='#dc2626';this.style.color='#dc2626';"
+                    onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--text)';">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
                     </svg>

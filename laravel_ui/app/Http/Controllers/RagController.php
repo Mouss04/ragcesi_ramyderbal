@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RagHistory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -20,7 +21,8 @@ class RagController extends Controller
         @set_time_limit(300);
 
         $validated = $request->validate([
-            'question' => ['required', 'string', 'max:1000'],
+            'question'        => ['required', 'string', 'max:1000'],
+            'chat_session_id' => ['nullable', 'string', 'max:36'],
         ]);
 
         $projectRoot = dirname(base_path());
@@ -67,6 +69,27 @@ class RagController extends Controller
             ], 500);
         }
 
+        // Persist history for all authenticated users
+        if ($request->user()) {
+            $this->saveHistory(
+                $request->user()->id,
+                $question,
+                $decoded,
+                $validated['chat_session_id'] ?? null
+            );
+        }
+
         return response()->json($decoded);
+    }
+
+    private function saveHistory(int $userId, string $question, array $decoded, ?string $chatSessionId): void
+    {
+        RagHistory::query()->create([
+            'user_id'         => $userId,
+            'chat_session_id' => $chatSessionId,
+            'question'        => $question,
+            'answer'          => $decoded['answer'] ?? null,
+            'sources'         => $decoded['sources'] ?? null,
+        ]);
     }
 }

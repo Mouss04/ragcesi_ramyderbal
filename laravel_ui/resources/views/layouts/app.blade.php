@@ -255,8 +255,14 @@
 <div class="shell">
     <header class="topbar">
         <a class="brand" href="{{ auth()->check() ? route('dashboard') : route('login') }}">
-            <span class="brand-badge">RG</span>
-            <span>RAG Company Portal</span>
+            @if($siteSetting->company_logo)
+                <img src="{{ Storage::url($siteSetting->company_logo) }}"
+                     alt="{{ $siteSetting->company_name ?? 'Logo' }}"
+                     style="max-height:34px;max-width:120px;object-fit:contain;display:block;">
+            @else
+                <span class="brand-badge">{{ $siteSetting->company_name ? mb_strtoupper(mb_substr($siteSetting->company_name, 0, 2)) : 'RG' }}</span>
+            @endif
+            <span>{{ $siteSetting->company_name ?? 'RAG Company Portal' }}</span>
         </a>
 
         <nav class="nav">
@@ -273,7 +279,6 @@
                 </form>
             @else
                 <a href="{{ route('login') }}">Login</a>
-                <a href="{{ route('register') }}">Register</a>
             @endauth
         </nav>
     </header>
