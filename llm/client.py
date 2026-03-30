@@ -29,8 +29,8 @@ class LLMClient:
 
     def _build_context_block(self, contexts: List[Dict[str, Any]]) -> str:
         blocks: List[str] = []
-        max_context_items = 4
-        max_chars_per_context = 900
+        max_context_items = 6
+        max_chars_per_context = 1800
 
         for i, item in enumerate(contexts[:max_context_items], start=1):
             document = item.get("document", {})
@@ -38,8 +38,8 @@ class LLMClient:
             text = str(document.get("text", ""))
             if len(text) > max_chars_per_context:
                 text = text[:max_chars_per_context].rstrip() + " ..."
-            blocks.append(f"[{i}] Source: {source}\n{text}")
-        return "\n\n".join(blocks) if blocks else "No relevant context found."
+            blocks.append(f"[Source {i}: {source}]\n{text}")
+        return "\n\n---\n\n".join(blocks) if blocks else "No relevant context found."
 
     def generate_answer(self, query: str, contexts: List[Dict[str, Any]]) -> str:
         """Generate an answer using LM Studio's OpenAI-compatible API."""
@@ -52,14 +52,24 @@ class LLMClient:
                 {
                     "role": "user",
                     "content": (
-                        "You are a helpful RAG assistant. Use only the provided context when possible and cite sources.\n\n"
-                        f"Question:\n{query}\n\n"
+                        "You are a precise RAG assistant. Answer the question using ONLY the provided context passages.\n"
+                        "Rules:\n"
+                        "- IMPORTANT: Always respond in the same language as the question. "
+                        "If the question is in French, answer in French. If in English, answer in English.\n"
+                        "- Be accurate and complete: include all relevant details from the context.\n"
+                        "- Cite sources inline when useful, e.g. (Source 1).\n"
+                        "- If multiple passages contain complementary information, synthesize them.\n"
+                        "- If the context does not contain enough information to answer, say so briefly "
+                        "in the same language as the question.\n"
+                        "- Do NOT invent facts beyond what is stated in the context.\n\n"
+                        f"Question: {query}\n\n"
                         f"Context:\n{context_block}\n\n"
-                        "Answer clearly. If context is insufficient, say so."
+                        "Answer:"
                     ),
                 },
             ],
-            "temperature": 0.2,
+            "temperature": 0.1,
+            "max_tokens": 512,
         }
 
         response = requests.post(

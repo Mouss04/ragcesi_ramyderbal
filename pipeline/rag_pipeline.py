@@ -49,7 +49,7 @@ class RAGPipeline:
         """Load an existing FAISS index from local files."""
         self.vector_store.load_index(self.index_path, self.meta_path)
 
-    def ask(self, query: str, top_k: int = 3) -> str:
+    def ask(self, query: str, top_k: int = 5) -> str:
         """Run retrieval and return generated answer."""
         query_vector = self.embedder.embed_query(query)
         contexts = self.retriever.retrieve(query_vector, top_k=top_k, query_text=query)

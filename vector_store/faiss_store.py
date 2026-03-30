@@ -27,7 +27,9 @@ class VectorStore:
             raise ValueError("Embeddings must be a 2D array-like structure.")
 
         self.dimension = int(vectors.shape[1])
-        self.index = faiss.IndexFlatL2(self.dimension)
+        # Normalise to unit length so IndexFlatIP gives cosine similarity.
+        faiss.normalize_L2(vectors)
+        self.index = faiss.IndexFlatIP(self.dimension)
         self.index.add(vectors)
 
         if documents is None:
@@ -88,6 +90,8 @@ class VectorStore:
             )
 
         k = min(top_k, len(self.documents)) if self.documents else top_k
+        # Normalise query vector for cosine similarity search.
+        faiss.normalize_L2(query)
         distances, indices = self.index.search(query, k)
 
         results: List[Dict[str, Any]] = []
