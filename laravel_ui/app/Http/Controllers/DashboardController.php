@@ -33,7 +33,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'usersCount'        => User::query()->where('company_id', $companyId)->count(),
             'documentsCount'    => Document::query()->count(), // already scoped via CompanyScope
-            'todayQueriesCount' => 0,
+            'todayQueriesCount' => RagHistory::query()->whereDate('created_at', today())->count(),
         ]);
     }
 
