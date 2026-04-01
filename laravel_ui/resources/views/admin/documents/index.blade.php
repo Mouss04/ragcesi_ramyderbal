@@ -273,8 +273,8 @@
             </svg>
         </div>
         <div>
-            <div class="doc-hero-title">Base documentaire</div>
-            <div class="doc-hero-sub">Gérez les fichiers indexés par le pipeline RAG</div>
+            <div class="doc-hero-title">{{ __('Document base') }}</div>
+            <div class="doc-hero-sub">{{ __('Manage files indexed by the RAG pipeline') }}</div>
         </div>
     </div>
     <div class="doc-hero-stats">
@@ -318,8 +318,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>
             </div>
             <div>
-                <div class="doc-card-head-title">Importer un document</div>
-                <div class="doc-card-head-sub">Indexation automatique après l'envoi</div>
+                <div class="doc-card-head-title">{{ __('Import a document') }}</div>
+                <div class="doc-card-head-sub">{{ __('Automatic indexing after upload') }}</div>
             </div>
         </div>
         <div class="doc-card-body">
@@ -327,21 +327,21 @@
                 @csrf
 
                 <div class="doc-field">
-                    <label for="title">Titre du document</label>
+                    <label for="title">{{ __('Document title') }}</label>
                     <input type="text" id="title" name="title" value="{{ old('title') }}"
                            placeholder="Ex: Rapport annuel 2025" required>
                 </div>
 
                 <div class="doc-field">
-                    <label>Fichier <span style="color:#9bb0b0;font-weight:500;">(PDF, TXT, MD · max 50 Mo)</span></label>
+                    <label>{{ __('File') }} <span style="color:#9bb0b0;font-weight:500;">(PDF, TXT, MD · max 50 Mo)</span></label>
                     <div class="doc-dropzone" id="drop-zone">
                         <input type="file" id="file" name="file" accept="application/pdf,text/plain,.md" required
                                onchange="onFileSelect(this)">
                         <div class="doc-dropzone-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </div>
-                        <div class="doc-dropzone-title">Glissez votre fichier ici</div>
-                        <div class="doc-dropzone-sub">ou cliquez pour parcourir</div>
+                        <div class="doc-dropzone-title">{{ __('Drag your file here') }}</div>
+                        <div class="doc-dropzone-sub">{{ __('or click to browse') }}</div>
                         <div class="doc-dropzone-file" id="file-name-badge">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             <span id="file-name-text"></span>
@@ -351,13 +351,13 @@
 
                 <button class="doc-upload-btn" type="submit" id="upload-button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>
-                    Importer et indexer
+                    {{ __('Import and index') }}
                 </button>
 
                 {{-- Progress --}}
                 <div class="doc-progress-wrap" id="upload-progress-wrap">
                     <div class="doc-progress-header">
-                        <span id="progress-status">Envoi en cours…</span>
+                        <span id="progress-status">{{ __('Uploading…') }}</span>
                         <span id="upload-progress-label">0%</span>
                     </div>
                     <div class="doc-progress-track">
@@ -365,13 +365,13 @@
                     </div>
                     <div class="doc-progress-steps">
                         <div class="doc-step active" id="step-upload">
-                            <div class="doc-step-dot"></div> Envoi
+                            <div class="doc-step-dot"></div> {{ __('Upload') }}
                         </div>
                         <div class="doc-step" id="step-index">
-                            <div class="doc-step-dot"></div> Indexation
+                            <div class="doc-step-dot"></div> {{ __('Indexing') }}
                         </div>
                         <div class="doc-step" id="step-done">
-                            <div class="doc-step-dot"></div> Terminé
+                            <div class="doc-step-dot"></div> {{ __('Done') }}
                         </div>
                     </div>
                 </div>
@@ -386,15 +386,15 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
             </div>
             <div>
-                <div class="doc-card-head-title">Documents indexés</div>
-                <div class="doc-card-head-sub">{{ $documents->count() }} fichier(s) dans la base</div>
+                <div class="doc-card-head-title">{{ __('Indexed documents') }}</div>
+                <div class="doc-card-head-sub">{{ $documents->count() }} {{ __('file(s) in the base') }}</div>
             </div>
         </div>
 
         <div class="doc-toolbar">
             <input type="text" class="doc-search" id="doc-search"
-                   placeholder="Rechercher un document…" oninput="filterDocs(this.value)">
-            <div class="doc-count" id="doc-count">{{ $documents->count() }} résultat(s)</div>
+                   placeholder="{{ __('Search a document…') }}" oninput="filterDocs(this.value)">
+            <div class="doc-count" id="doc-count">{{ $documents->count() }} {{ __('result(s)') }}</div>
         </div>
 
         <div class="doc-list" id="doc-list">
@@ -430,8 +430,8 @@
                     <div class="doc-empty-icon">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                     </div>
-                    <div class="doc-empty-title">Aucun document importé</div>
-                    <div class="doc-empty-sub">Utilisez le formulaire ci-contre pour ajouter votre premier fichier.</div>
+                    <div class="doc-empty-title">{{ __('No document imported') }}</div>
+                    <div class="doc-empty-sub">{{ __('Use the form on the left to add your first file.') }}</div>
                 </div>
             @endforelse
         </div>
@@ -491,11 +491,11 @@ if (dropZone) {
             if (r >= 30 && r < 70) {
                 stepUpload.classList.remove('active'); stepUpload.classList.add('done');
                 stepIndex.classList.add('active');
-                status.textContent = 'Indexation en cours…';
+                status.textContent = '{{ __('Indexing in progress…') }}';
             } else if (r >= 70) {
                 stepIndex.classList.remove('active'); stepIndex.classList.add('done');
                 stepDone.classList.add('active');
-                status.textContent = 'Finalisation…';
+                status.textContent = '{{ __('Finalizing…') }}';
             }
         }, 180);
     });
@@ -518,7 +518,7 @@ function filterDocs(q) {
         row.style.display = match ? '' : 'none';
         if (match) visible++;
     });
-    if (countEl) countEl.textContent = visible + ' résultat(s)';
+    if (countEl) countEl.textContent = visible + ' {{ __('result(s)') }}';
 }
 </script>
 @endpush

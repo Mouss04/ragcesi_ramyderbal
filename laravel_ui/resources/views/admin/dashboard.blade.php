@@ -153,7 +153,7 @@
         {{-- Users --}}
         <div class="stat-card">
             <div class="stat-card-top">
-                <span class="stat-card-label">Nombre d'utilisateurs</span>
+                <span class="stat-card-label">{{ __('Number of users') }}</span>
                 <div class="stat-card-icon" style="background:var(--teal-soft);">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -164,7 +164,7 @@
             <div class="stat-card-value">{{ $usersCount }}</div>
             <div class="stat-card-footer">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="stroke:var(--teal)" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-                Utilisateurs enregistrés
+                {{ __('Registered users') }}
             </div>
             <div class="stat-card-stripe" style="background:linear-gradient(90deg,var(--teal),var(--teal-mid));"></div>
         </div>
@@ -172,7 +172,7 @@
         {{-- Documents --}}
         <div class="stat-card">
             <div class="stat-card-top">
-                <span class="stat-card-label">Nombre de documents</span>
+                <span class="stat-card-label">{{ __('Number of documents') }}</span>
                 <div class="stat-card-icon" style="background:#fef9ec;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
@@ -183,7 +183,7 @@
             <div class="stat-card-value">{{ $documentsCount }}</div>
             <div class="stat-card-footer">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-                Documents indexés
+                {{ __('Indexed documents') }}
             </div>
             <div class="stat-card-stripe" style="background:linear-gradient(90deg,#d4a017,#f5cb5c);"></div>
         </div>
@@ -191,7 +191,7 @@
         {{-- Queries today --}}
         <div class="stat-card">
             <div class="stat-card-top">
-                <span class="stat-card-label">Requêtes aujourd'hui</span>
+                <span class="stat-card-label">{{ __('Queries today') }}</span>
                 <div class="stat-card-icon" style="background:#f0f0ff;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -201,7 +201,7 @@
             <div class="stat-card-value">{{ $todayQueriesCount }}</div>
             <div class="stat-card-footer">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-                Requêtes RAG du jour
+                {{ __('Today\'s RAG queries') }}
             </div>
             <div class="stat-card-stripe" style="background:linear-gradient(90deg,#6366f1,#a5b4fc);"></div>
         </div>
@@ -218,8 +218,8 @@
                 </svg>
             </div>
             <div>
-                <div class="action-label">Gestion des utilisateurs</div>
-                <div class="action-sub">Créer, modifier, supprimer des comptes</div>
+                <div class="action-label">{{ __('User management') }}</div>
+                <div class="action-sub">{{ __('Create, edit, delete accounts') }}</div>
             </div>
             <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
@@ -232,8 +232,8 @@
                 </svg>
             </div>
             <div>
-                <div class="action-label">Gestion des documents</div>
-                <div class="action-sub">Importer et indexer des fichiers PDF</div>
+                <div class="action-label">{{ __('Document management') }}</div>
+                <div class="action-sub">{{ __('Import and index PDF files') }}</div>
             </div>
             <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
@@ -248,24 +248,18 @@
 @push('scripts')
 <script>
 (function() {
-    const TZ = '{{ auth()->user()->timezone ?? 'Africa/Algiers' }}';
-    const DAYS   = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-    const MONTHS = ['janvier','février','mars','avril','mai','juin',
-                    'juillet','août','septembre','octobre','novembre','décembre'];
+    const TZ     = '{{ auth()->user()->timezone ?? 'Africa/Algiers' }}';
+    const LOCALE = '{{ app()->getLocale() === 'fr' ? 'fr-FR' : 'en-GB' }}';
 
     function updateDashClock() {
         const now  = new Date(new Date().toLocaleString('en-US', { timeZone: TZ }));
-        const day  = DAYS[now.getDay()];
-        const date = now.getDate();
-        const mon  = MONTHS[now.getMonth()];
-        const yr   = now.getFullYear();
         const hh   = String(now.getHours()).padStart(2,'0');
         const mm   = String(now.getMinutes()).padStart(2,'0');
         const ss   = String(now.getSeconds()).padStart(2,'0');
 
         const dateEl = document.getElementById('dash-date');
         const timeEl = document.getElementById('dash-time');
-        if (dateEl) dateEl.textContent = day + ' ' + date + ' ' + mon + ' ' + yr;
+        if (dateEl) dateEl.textContent = now.toLocaleDateString(LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         if (timeEl) timeEl.textContent = hh + ':' + mm + ':' + ss;
     }
 

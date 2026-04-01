@@ -97,4 +97,15 @@ class SettingsController extends Controller
 
         return back()->with('status', 'Fuseau horaire mis à jour.');
     }
+
+    public function updateLanguage(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'locale' => ['required', 'in:fr,en'],
+        ]);
+
+        session(['locale' => $request->locale]);
+
+        return back()->with('status', 'Langue mise à jour.');
+    }
 }

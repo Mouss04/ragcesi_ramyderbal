@@ -1,4 +1,4 @@
-@extends('layouts.employee')
+@extends('layouts.witrack')
 
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
@@ -11,28 +11,36 @@
 }
 .crop-modal-overlay.open { display:flex; }
 .crop-modal {
-    background:#fff; border-radius:20px; width:min(96vw,700px);
-    box-shadow:0 24px 64px rgba(0,0,0,.35); overflow:hidden;
-    display:flex; flex-direction:column; max-height:92vh;
+    background:#fff; border-radius:20px;
+    width:min(96vw, 700px);
+    box-shadow:0 24px 64px rgba(0,0,0,.35);
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    max-height:92vh;
 }
 .crop-modal-header {
-    padding:1.1rem 1.5rem; border-bottom:1.5px solid #edf2f2;
+    padding:1.1rem 1.5rem;
+    border-bottom:1.5px solid #edf2f2;
     display:flex; align-items:center; justify-content:space-between;
 }
 .crop-modal-title { font-size:1rem; font-weight:800; color:#1e2c2c; }
 .crop-modal-close {
     width:32px; height:32px; border-radius:50%;
     background:#f0f4f4; border:none; cursor:pointer;
-    display:grid; place-items:center; color:#4a7070; transition:background 140ms;
+    display:grid; place-items:center; color:#4a7070;
+    transition:background 140ms;
 }
 .crop-modal-close:hover { background:#e0ecec; }
 .crop-area {
-    background:#1a1a1a; flex:1; overflow:hidden; max-height:55vh;
+    background:#1a1a1a;
+    flex:1; overflow:hidden;
+    max-height:55vh;
     display:flex; align-items:center; justify-content:center;
 }
 .crop-area img { max-width:100%; display:block; }
 .crop-controls {
-    padding:1rem 1.5rem; border-top:1.5px solid #edf2f2;
+    padding:1rem 1.5rem;
+    border-top:1.5px solid #edf2f2;
     display:flex; flex-direction:column; gap:.9rem;
 }
 .crop-ctrl-row { display:flex; align-items:center; gap:1rem; }
@@ -47,7 +55,8 @@
 .crop-zoom-slider { flex:1; accent-color:#0c7070; height:4px; cursor:pointer; }
 .crop-actions {
     display:flex; align-items:center; justify-content:flex-end;
-    gap:.7rem; padding:1rem 1.5rem; border-top:1.5px solid #edf2f2;
+    gap:.7rem; padding:1rem 1.5rem;
+    border-top:1.5px solid #edf2f2;
 }
 .crop-btn-cancel {
     padding:.5rem 1.1rem; border-radius:10px;
@@ -57,32 +66,41 @@
 .crop-btn-cancel:hover { background:#e4ecec; }
 .crop-btn-save {
     padding:.5rem 1.4rem; border-radius:10px;
-    background:linear-gradient(135deg,var(--teal),var(--teal-mid));
+    background:linear-gradient(135deg,#0c7070,#14a8a8);
     border:none; font-size:.85rem; font-weight:700; color:#fff;
-    cursor:pointer; box-shadow:0 3px 10px var(--teal-shadow); transition:opacity 140ms;
+    cursor:pointer; box-shadow:0 3px 10px rgba(12,112,112,.3);
+    transition:opacity 140ms;
 }
 .crop-btn-save:hover { opacity:.88; }
 
-/* ── Hero banner ── */
+/* ── Settings layout ── */
 .settings-hero {
-    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 55%, var(--teal-light) 100%);
-    border-radius: 20px; padding: 2rem 2.2rem;
-    display: flex; align-items: center; gap: 1.8rem;
-    margin-bottom: 1.6rem; position: relative; overflow: hidden;
-    box-shadow: 0 8px 32px var(--teal-shadow);
+    background: linear-gradient(135deg, #0c7070 0%, #14a8a8 55%, #1cc4c4 100%);
+    border-radius: 20px;
+    padding: 2rem 2.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.8rem;
+    margin-bottom: 1.6rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(12,112,112,.28);
 }
 .settings-hero::before {
     content:''; position:absolute; top:-50px; right:-50px;
-    width:240px; height:240px; border-radius:50%; background:rgba(255,255,255,.07);
+    width:240px; height:240px; border-radius:50%;
+    background:rgba(255,255,255,.07);
 }
 .settings-hero::after {
     content:''; position:absolute; bottom:-70px; right:90px;
-    width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.05);
+    width:180px; height:180px; border-radius:50%;
+    background:rgba(255,255,255,.05);
 }
 .hero-avatar-wrap { position:relative; flex-shrink:0; cursor:pointer; }
 .hero-avatar {
     width:88px; height:88px; border-radius:50%;
-    background:rgba(255,255,255,.18); border:3px solid rgba(255,255,255,.45);
+    background:rgba(255,255,255,.18);
+    border:3px solid rgba(255,255,255,.45);
     display:grid; place-items:center; overflow:hidden;
     font-size:2rem; font-weight:800; color:#fff; transition:filter 200ms;
 }
@@ -101,7 +119,8 @@
     display:inline-flex; align-items:center; gap:5px;
     background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25);
     border-radius:20px; padding:.25rem .8rem;
-    font-size:.75rem; font-weight:600; color:rgba(255,255,255,.9); backdrop-filter:blur(4px);
+    font-size:.75rem; font-weight:600; color:rgba(255,255,255,.9);
+    backdrop-filter:blur(4px);
 }
 .hero-edit-btn {
     z-index:1; background:rgba(255,255,255,.15); border:1.5px solid rgba(255,255,255,.3);
@@ -112,13 +131,12 @@
 }
 .hero-edit-btn:hover { background:rgba(255,255,255,.25); }
 
-/* ── Layout ── */
 .settings-layout {
-    display: grid; grid-template-columns: 240px 1fr;
-    gap: 1.4rem; align-items: start;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 1.4rem;
+    align-items: start;
 }
-
-/* ── Sidebar nav ── */
 .settings-nav {
     background:#fff; border:1.5px solid #dde8e8; border-radius:18px;
     padding:.5rem; display:flex; flex-direction:column; gap:.15rem;
@@ -129,8 +147,10 @@
     color:#9bb0b0; text-transform:uppercase; padding:.65rem .9rem .3rem;
 }
 .snav-item {
-    display:flex; align-items:center; gap:.85rem; padding:.72rem 1rem; border-radius:12px;
-    background:none; border:none; cursor:pointer; font:inherit; text-align:left; width:100%;
+    display:flex; align-items:center; gap:.85rem;
+    padding:.72rem 1rem; border-radius:12px;
+    background:none; border:none; cursor:pointer;
+    font:inherit; text-align:left; width:100%;
     transition:background 130ms, color 130ms; position:relative; text-decoration:none;
 }
 .snav-icon {
@@ -151,41 +171,41 @@
 }
 .snav-divider { height:1px; background:#edf2f2; margin:.3rem .9rem; }
 
-/* ── Panels ── */
 .settings-panel { display:none; flex-direction:column; gap:1.3rem; }
 .settings-panel.active { display:flex; }
 
-/* ── Cards ── */
 .scard {
     background:#fff; border:1.5px solid #dde8e8; border-radius:18px;
-    overflow:hidden; box-shadow:0 2px 12px rgba(12,112,112,.06); transition:box-shadow 200ms;
+    overflow:hidden; box-shadow:0 2px 12px rgba(12,112,112,.06);
+    transition:box-shadow 200ms;
 }
 .scard:hover { box-shadow:0 4px 20px rgba(12,112,112,.10); }
 .scard-head {
     padding:1.2rem 1.6rem; border-bottom:1px solid #edf2f2;
-    display:flex; align-items:center; gap:.9rem; position:relative; overflow:hidden;
+    display:flex; align-items:center; gap:.9rem;
+    position:relative; overflow:hidden;
 }
 .scard-head::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; }
-.scard-head.teal::after   { background:linear-gradient(90deg,var(--teal),var(--teal-light)); }
-.scard-head.gold::after   { background:linear-gradient(90deg,#d4a017,#f5c842); }
-.scard-head.green::after  { background:linear-gradient(90deg,#16a34a,#4ade80); }
-.scard-head.purple::after { background:linear-gradient(90deg,#9333ea,#c084fc); }
+.scard-head.teal::after  { background:linear-gradient(90deg,#0c7070,#1cc4c4); }
+.scard-head.gold::after  { background:linear-gradient(90deg,#d4a017,#f5c842); }
 .scard-hicon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
 .scard-htitle { font-weight:700; font-size:1rem; color:#1e2c2c; }
 .scard-hsub   { font-size:.78rem; color:#6b8080; margin-top:2px; }
 .scard-body   { padding:1.5rem 1.6rem; display:flex; flex-direction:column; gap:1.15rem; }
 
-/* ── Avatar section ── */
 .avatar-section {
-    display:flex; align-items:center; gap:1.4rem; padding:1.3rem 1.5rem;
-    background:linear-gradient(135deg,#f4fbfb,#e8f7f7); border:1.5px dashed #a0cccc;
-    border-radius:14px; cursor:pointer; transition:border-color 150ms, background 150ms; position:relative;
+    display:flex; align-items:center; gap:1.4rem;
+    padding:1.3rem 1.5rem;
+    background:linear-gradient(135deg,#f4fbfb,#e8f7f7);
+    border:1.5px dashed #a0cccc; border-radius:14px;
+    cursor:pointer; transition:border-color 150ms, background 150ms; position:relative;
 }
-.avatar-section:hover { border-color:var(--teal); background:linear-gradient(135deg,#e8f7f7,#d5f0f0); }
+.avatar-section:hover { border-color:#0c7070; background:linear-gradient(135deg,#e8f7f7,#d5f0f0); }
 .av-ring {
-    width:80px; height:80px; border-radius:50%; display:grid; place-items:center;
-    flex-shrink:0; overflow:hidden; background:linear-gradient(135deg,var(--teal),var(--teal-mid));
-    border:3px solid #fff; box-shadow:0 4px 14px var(--teal-shadow);
+    width:80px; height:80px; border-radius:50%;
+    display:grid; place-items:center; flex-shrink:0; overflow:hidden;
+    background:linear-gradient(135deg,#0c7070,#14a8a8);
+    border:3px solid #fff; box-shadow:0 4px 14px rgba(12,112,112,.28);
     font-size:1.6rem; font-weight:800; color:#fff; position:relative;
 }
 .av-ring img { width:100%; height:100%; object-fit:cover; }
@@ -199,13 +219,12 @@
 .av-info-sub   { font-size:.76rem; color:#6b8080; margin-top:3px; }
 .av-btn {
     margin-left:auto; background:#fff; border:1.5px solid #c5dede; border-radius:10px;
-    padding:.5rem 1rem; font:inherit; font-size:.82rem; font-weight:600; color:var(--teal);
-    cursor:pointer; display:flex; align-items:center; gap:.4rem;
+    padding:.5rem 1rem; font:inherit; font-size:.82rem; font-weight:600;
+    color:#0c7070; cursor:pointer; display:flex; align-items:center; gap:.4rem;
     transition:background 140ms, border-color 140ms; white-space:nowrap;
 }
-.av-btn:hover { background:var(--teal-soft); border-color:var(--teal); }
+.av-btn:hover { background:#e8f7f7; border-color:#0c7070; }
 
-/* ── Form elements ── */
 .form-row  { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 .form-group { display:flex; flex-direction:column; gap:.32rem; }
 .form-group label { font-size:.82rem; font-weight:600; color:#2c4040; letter-spacing:.01em; }
@@ -214,10 +233,9 @@
     padding:.6rem .9rem; font:inherit; font-size:.88rem; color:#1e2c2c;
     background:#fafefe; transition:border-color 150ms, box-shadow 150ms; outline:none;
 }
-.form-group input:focus { border-color:var(--teal); box-shadow:0 0 0 3px var(--teal-shadow); background:#fff; }
+.form-group input:focus { border-color:#0c7070; box-shadow:0 0 0 3px rgba(12,112,112,.15); background:#fff; }
 .form-hint { font-size:.74rem; color:#6b8080; margin-top:2px; }
 
-/* ── Password ── */
 .pw-wrap { position:relative; }
 .pw-wrap input { padding-right:2.8rem; }
 .pw-toggle {
@@ -231,44 +249,19 @@
 .pw-bar { flex:1; height:4px; border-radius:99px; background:#e2eaea; transition:background .3s; }
 .pw-strength-label { font-size:.74rem; font-weight:600; color:#9bb0b0; }
 
-/* ── Info band ── */
 .info-band {
-    background:var(--teal-soft); border:1.5px solid #c8e8e8; border-radius:10px;
+    background:#e6f4f4; border:1.5px solid #c8e8e8; border-radius:10px;
     padding:.7rem 1rem; display:flex; align-items:center; gap:.6rem;
-    font-size:.8rem; color:var(--teal);
+    font-size:.8rem; color:#0c7070;
 }
-
-/* ── Language cards ── */
-.lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.lang-card {
-    position:relative; display:flex; flex-direction:column; align-items:center; gap:.6rem;
-    padding:1.4rem 1rem; border:2px solid #dde8e8; border-radius:14px;
-    cursor:pointer; transition:150ms ease; background:#fff;
-}
-.lang-card:hover { border-color:#14a8a8; background:#f4fafa; }
-.lang-card.selected { border-color:#0c7070; background:#e8f6f6; }
-.lang-card input[type=radio] { position:absolute; opacity:0; pointer-events:none; }
-.lang-flag { font-size:2.2rem; line-height:1; }
-.lang-label { font-size:.9rem; font-weight:700; color:#1e2c2c; }
-.lang-sub   { font-size:.74rem; color:#6b8080; }
-.lang-check {
-    width:20px; height:20px; border-radius:50%; border:2px solid #c4d8d8;
-    display:grid; place-items:center; margin-top:.2rem; transition:150ms ease;
-}
-.lang-card.selected .lang-check { background:#0c7070; border-color:#0c7070; }
-.lang-card.selected .lang-check::after {
-    content:''; width:6px; height:6px; border-radius:50%; background:#fff;
-}
-
-/* ── Actions ── */
 .form-actions { display:flex; justify-content:flex-end; gap:.65rem; padding-top:.3rem; }
 .btn-save {
     display:inline-flex; align-items:center; gap:.5rem;
-    background:linear-gradient(135deg,var(--teal),var(--teal-mid));
-    color:#fff; border:none; border-radius:10px; padding:.65rem 1.4rem;
-    font:inherit; font-size:.88rem; font-weight:700;
+    background:linear-gradient(135deg,#0c7070,#14a8a8);
+    color:#fff; border:none; border-radius:10px;
+    padding:.65rem 1.4rem; font:inherit; font-size:.88rem; font-weight:700;
     cursor:pointer; transition:opacity 150ms, transform 120ms;
-    box-shadow:0 3px 10px var(--teal-shadow);
+    box-shadow:0 3px 10px rgba(12,112,112,.28);
 }
 .btn-save:hover { opacity:.9; transform:translateY(-1px); }
 .btn-save:active { transform:translateY(0); }
@@ -310,15 +303,11 @@
 
     <div class="hero-info">
         <div class="hero-name">{{ auth()->user()->name }}</div>
-        <div class="hero-role">{{ auth()->user()->role === 'supervisor' ? __('Supervisor') : __('Employee') }}</div>
+        <div class="hero-role">{{ __('Witrack Agent') }}</div>
         <div class="hero-badges">
             <span class="hero-badge">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                {{ auth()->user()->timezone ?? 'Africa/Algiers' }}
-            </span>
-            <span class="hero-badge">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                {{ strtoupper(session('locale', config('app.locale', 'fr'))) }}
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Witrack
             </span>
         </div>
     </div>
@@ -329,10 +318,17 @@
     </button>
 </div>
 
+@if(session('status'))
+    <div style="margin-bottom:1rem;padding:.75rem 1rem;background:#e6f4f4;border:1.5px solid #a0d8d8;border-radius:10px;font-size:.85rem;color:#0c7070;display:flex;align-items:center;gap:.5rem;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        {{ session('status') }}
+    </div>
+@endif
+
 {{-- ── Grid Layout ── --}}
 <div class="settings-layout">
 
-    {{-- ── Left Nav ── --}}
+    {{-- Left Nav --}}
     <nav class="settings-nav">
         <div class="snav-label">{{ __('My account') }}</div>
 
@@ -355,32 +351,9 @@
                 <span class="snav-desc">{{ __('Account security') }}</span>
             </div>
         </button>
-
-        <div class="snav-divider"></div>
-        <div class="snav-label">{{ __('Preferences') }}</div>
-
-        <button class="snav-item" data-tab="timezone" onclick="switchTab('timezone',this)" type="button">
-            <div class="snav-icon" style="background:#ecfdf5;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            </div>
-            <div class="snav-text">
-                <span class="snav-title">{{ __('Timezone') }}</span>
-                <span class="snav-desc">{{ auth()->user()->timezone ?? 'Africa/Algiers' }}</span>
-            </div>
-        </button>
-
-        <button class="snav-item" data-tab="language" onclick="switchTab('language',this)" type="button">
-            <div class="snav-icon" style="background:#fdf4ff;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-            </div>
-            <div class="snav-text">
-                <span class="snav-title">{{ __('Language') }}</span>
-                <span class="snav-desc">{{ __('Display language') }}</span>
-            </div>
-        </button>
     </nav>
 
-    {{-- ── Panels ── --}}
+    {{-- Right panels --}}
     <div>
 
         {{-- ═══════ PROFILE ═══════ --}}
@@ -396,7 +369,7 @@
                     </div>
                 </div>
                 <div class="scard-body">
-                    <form method="POST" action="{{ route('employee.settings.profile') }}" enctype="multipart/form-data" id="profile-form">
+                    <form method="POST" action="{{ route('witrack.settings.profile') }}" enctype="multipart/form-data" id="profile-form">
                         @csrf
 
                         <label class="avatar-section" for="avatar-input">
@@ -461,13 +434,13 @@
                     </div>
                 </div>
                 <div class="scard-body">
-                    <form method="POST" action="{{ route('employee.settings.password') }}">
+                    <form method="POST" action="{{ route('witrack.settings.password') }}">
                         @csrf
 
                         <div class="form-group">
                             <label for="current_password">{{ __('Current password') }}</label>
                             <div class="pw-wrap">
-                                <input type="password" id="current_password" name="current_password" placeholder="••••••••" required>
+                                <input type="password" id="current_password" name="current_password" placeholder="••••••••" required autocomplete="current-password">
                                 <button class="pw-toggle" type="button" onclick="togglePw('current_password',this)">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
@@ -482,7 +455,7 @@
                                 <label for="password">{{ __('New password') }}</label>
                                 <div class="pw-wrap">
                                     <input type="password" id="password" name="password" placeholder="••••••••" required
-                                           oninput="checkStrength(this.value)">
+                                           oninput="checkStrength(this.value)" autocomplete="new-password">
                                     <button class="pw-toggle" type="button" onclick="togglePw('password',this)">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
@@ -491,7 +464,7 @@
                             <div class="form-group">
                                 <label for="password_confirmation">{{ __('Confirm password') }}</label>
                                 <div class="pw-wrap">
-                                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required>
+                                    <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required autocomplete="new-password">
                                     <button class="pw-toggle" type="button" onclick="togglePw('password_confirmation',this)">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
@@ -516,92 +489,6 @@
                             <button type="submit" class="btn-save">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                                 {{ __('Update password') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {{-- ═══════ TIMEZONE ═══════ --}}
-        <div class="settings-panel" id="panel-timezone">
-            <div class="scard">
-                <div class="scard-head green">
-                    <div class="scard-hicon" style="background:#ecfdf5;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    </div>
-                    <div>
-                        <div class="scard-htitle">{{ __('Timezone') }}</div>
-                        <div class="scard-hsub">{{ __('Local time displayed in the application') }}</div>
-                    </div>
-                </div>
-                <div class="scard-body">
-                    <form method="POST" action="{{ route('employee.settings.timezone') }}">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="timezone">{{ __('Timezone') }}</label>
-                            <select name="timezone" id="timezone" style="width:100%;border:1.5px solid #d0e2e2;border-radius:10px;padding:.6rem .9rem;font:inherit;font-size:.88rem;color:#1e2c2c;background:#fafefe;outline:none;">
-                                @foreach($timezones as $tz)
-                                    <option value="{{ $tz }}" {{ (auth()->user()->timezone ?? 'Africa/Algiers') === $tz ? 'selected' : '' }}>
-                                        {{ $tz }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('timezone')
-                                <div class="form-hint" style="color:#dc2626;">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-save">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                {{ __('Save') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {{-- ═══════ LANGUAGE ═══════ --}}
-        <div class="settings-panel" id="panel-language">
-            <div class="scard">
-                <div class="scard-head purple">
-                    <div class="scard-hicon" style="background:#fdf4ff;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                    </div>
-                    <div>
-                        <div class="scard-htitle">{{ __('Interface language') }}</div>
-                        <div class="scard-hsub">{{ __('Choose the display language of the application') }}</div>
-                    </div>
-                </div>
-                <div class="scard-body">
-                    <form method="POST" action="{{ route('employee.settings.language') }}">
-                        @csrf
-                        @php $currentLocale = session('locale', config('app.locale', 'fr')); @endphp
-
-                        <div class="lang-grid">
-                            <label class="lang-card {{ $currentLocale === 'fr' ? 'selected' : '' }}" id="lang-card-fr" onclick="selectLang('fr')">
-                                <input type="radio" name="locale" value="fr" {{ $currentLocale === 'fr' ? 'checked' : '' }}>
-                                <span class="lang-flag">🇫🇷</span>
-                                <span class="lang-label">Français</span>
-                                <span class="lang-sub">French</span>
-                                <span class="lang-check"></span>
-                            </label>
-                            <label class="lang-card {{ $currentLocale === 'en' ? 'selected' : '' }}" id="lang-card-en" onclick="selectLang('en')">
-                                <input type="radio" name="locale" value="en" {{ $currentLocale === 'en' ? 'checked' : '' }}>
-                                <span class="lang-flag">🇬🇧</span>
-                                <span class="lang-label">English</span>
-                                <span class="lang-sub">Anglais</span>
-                                <span class="lang-check"></span>
-                            </label>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-save">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                                {{ __('Save language') }}
                             </button>
                         </div>
                     </form>
@@ -640,9 +527,10 @@ function openCropModal(file, callback) {
         document.getElementById('crop-rotate-range').value = 0;
         if (cropperInst) { cropperInst.destroy(); cropperInst = null; }
         cropperInst = new Cropper(img, {
-            aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 0.85,
-            restore: false, guides: false, center: true, highlight: false,
-            cropBoxMovable: false, cropBoxResizable: false, toggleDragModeOnDblclick: false,
+            aspectRatio: 1, viewMode: 1, dragMode: 'move',
+            autoCropArea: 0.85, restore: false, guides: false, center: true,
+            highlight: false, cropBoxMovable: false, cropBoxResizable: false,
+            toggleDragModeOnDblclick: false,
         });
     };
     reader.readAsDataURL(file);
@@ -656,7 +544,8 @@ function closeCropModal() {
 
 function onZoomSlider(val) {
     if (!cropperInst) return;
-    cropperInst.zoomTo(Math.max(0.1, 1 + (val - 50) / 50 * 1.5));
+    const ratio = (val - 50) / 50 * 1.5;
+    cropperInst.zoomTo(Math.max(0.1, 1 + ratio));
 }
 
 function applyCrop() {
@@ -671,7 +560,8 @@ function applyCrop() {
 
 function syncHeroAvatar(input) {
     if (!input.files || !input.files[0]) return;
-    const file = input.files[0]; input.value = '';
+    const file = input.files[0];
+    input.value = '';
     openCropModal(file, (dataURL, blob) => {
         const heroHtml    = '<img src="' + dataURL + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;">';
         const overlayHtml = '<div class="av-ring-overlay"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
@@ -679,21 +569,24 @@ function syncHeroAvatar(input) {
         const avRing = document.getElementById('av-ring');
         if (avRing) avRing.innerHTML = heroHtml + overlayHtml;
         const croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-        const dt = new DataTransfer(); dt.items.add(croppedFile);
+        const dt = new DataTransfer();
+        dt.items.add(croppedFile);
         document.getElementById('avatar-input').files = dt.files;
     });
 }
 
 function previewAvatar(input) {
     if (!input.files || !input.files[0]) return;
-    const file = input.files[0]; input.value = '';
+    const file = input.files[0];
+    input.value = '';
     openCropModal(file, (dataURL, blob) => {
         const heroHtml    = '<img src="' + dataURL + '" alt="avatar" style="width:100%;height:100%;object-fit:cover;">';
         const overlayHtml = '<div class="av-ring-overlay"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V7a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
-        document.getElementById('av-ring').innerHTML  = heroHtml + overlayHtml;
+        document.getElementById('av-ring').innerHTML = heroHtml + overlayHtml;
         document.getElementById('hero-avatar').innerHTML = heroHtml;
         const croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
-        const dt = new DataTransfer(); dt.items.add(croppedFile);
+        const dt = new DataTransfer();
+        dt.items.add(croppedFile);
         input.files = dt.files;
     });
 }
@@ -724,22 +617,9 @@ function checkStrength(val) {
     document.getElementById('pw-strength-label').style.color = colors[score - 1] || colors[0];
 }
 
-/* ── Language card toggle ── */
-function selectLang(code) {
-    ['fr','en'].forEach(c => {
-        document.getElementById('lang-card-' + c).classList.toggle('selected', c === code);
-        const radio = document.querySelector('#lang-card-' + c + ' input[type=radio]');
-        if (radio) radio.checked = (c === code);
-    });
-}
-
 /* ── Auto-open correct tab on validation errors ── */
 @if($errors->hasAny(['current_password', 'password']))
-    document.addEventListener('DOMContentLoaded', () => switchTab('password', null));
-@elseif($errors->has('timezone'))
-    document.addEventListener('DOMContentLoaded', () => switchTab('timezone', null));
-@elseif(session('_lang_tab'))
-    document.addEventListener('DOMContentLoaded', () => switchTab('language', null));
+    document.addEventListener('DOMContentLoaded', () => switchTab('password', document.querySelector('[data-tab=password]')));
 @endif
 </script>
 @endpush
@@ -753,17 +633,19 @@ function selectLang(code) {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <div class="crop-area"><img id="crop-img" src="" alt=""></div>
+        <div class="crop-area">
+            <img id="crop-img" src="" alt="">
+        </div>
         <div class="crop-controls">
             <div class="crop-ctrl-row">
                 <span class="crop-ctrl-label">Rogner</span>
-                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.rotate(-90)">
+                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.rotate(-90)" title="Rotation gauche">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
                 </button>
-                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.rotate(90)">
+                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.rotate(90)" title="Rotation droite">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
                 </button>
-                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.scaleX(cropperInst.getData().scaleX === -1 ? 1 : -1)">
+                <button type="button" class="crop-icon-btn" onclick="cropperInst && cropperInst.scaleX(cropperInst.getData().scaleX === -1 ? 1 : -1)" title="Miroir">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                 </button>
             </div>

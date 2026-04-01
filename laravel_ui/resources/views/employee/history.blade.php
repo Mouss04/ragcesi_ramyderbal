@@ -140,19 +140,19 @@
             </svg>
         </div>
         <div>
-            <div class="hist-hero-title">Historique des questions</div>
-            <div class="hist-hero-sub">Retrouvez toutes vos questions posées à l'assistant IA</div>
+            <div class="hist-hero-title">{{ __('Question history') }}</div>
+            <div class="hist-hero-sub">{{ __('Find all your questions asked to the AI assistant') }}</div>
         </div>
     </div>
     <div class="hist-count-pill">
         <div class="hist-count-num">{{ $sessions->total() }}</div>
-        <div class="hist-count-label">Conversations</div>
+        <div class="hist-count-label">{{ __('Conversations') }}</div>
     </div>
 </div>
 
 <div class="hist-card">
     <div class="hist-card-head">
-        <div class="hist-card-head-title">Vos conversations</div>
+        <div class="hist-card-head-title">{{ __('Your conversations') }}</div>
         @if($sessions->total() > 0)
             <form method="POST" action="{{ route('employee.history.clear') }}"
                   onsubmit="return confirm('Vider tout l\'historique ?');">
@@ -190,7 +190,7 @@
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                     </svg>
-                    Voir la conversation
+                    {{ __('View conversation') }}
                 </a>
             </div>
             <div class="hist-item-meta">
@@ -203,8 +203,8 @@
             <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
-            <p>Vous n'avez posé aucune question pour le moment.</p>
-            <p style="margin-top:.5rem;"><a href="{{ route('employee.dashboard') }}" style="color:var(--teal);font-weight:600;">Poser ma première question →</a></p>
+            <p>{{ __('You have not asked any questions yet.') }}</p>
+            <p style="margin-top:.5rem;"><a href="{{ route('employee.dashboard') }}" style="color:var(--teal);font-weight:600;">{{ __('Ask my first question') }} →</a></p>
         </div>
     @endforelse
 </div>

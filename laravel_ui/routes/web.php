@@ -11,7 +11,7 @@ use App\Http\Controllers\RagController;
 use App\Http\Controllers\Witrack\WitrackController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::get('/', fn () => view('home'))->name('home');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/companies/create', [WitrackController::class, 'create'])->name('companies.create');
         Route::post('/companies', [WitrackController::class, 'store'])->name('companies.store');
         Route::delete('/companies/{company}', [WitrackController::class, 'destroy'])->name('companies.destroy');
+        Route::get('/settings', [WitrackController::class, 'settings'])->name('settings');
+        Route::post('/settings/profile',  [WitrackController::class, 'updateProfile'])->name('settings.profile');
+        Route::post('/settings/password', [WitrackController::class, 'updatePassword'])->name('settings.password');
     });
 
     // ── Admin / Supervisor ─────────────────────────────────────────────────────
@@ -42,6 +45,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
         Route::post('/settings/datetime', [SettingsController::class, 'updateDatetime'])->name('settings.datetime');
+        Route::post('/settings/language', [SettingsController::class, 'updateLanguage'])->name('settings.language');
 
         // Company & theme — admin only
         Route::middleware('role:admin')->post('/settings/company', [SettingsController::class, 'updateCompany'])->name('settings.company');
@@ -64,7 +68,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/settings', [EmployeeController::class, 'settings'])->name('settings');
         Route::post('/settings/profile',  [EmployeeController::class, 'updateProfile'])->name('settings.profile');
         Route::post('/settings/password', [EmployeeController::class, 'updatePassword'])->name('settings.password');
-        Route::post('/settings/location', [EmployeeController::class, 'updateLocation'])->name('settings.location');
+        Route::post('/settings/timezone', [EmployeeController::class, 'updateTimezone'])->name('settings.timezone');
+        Route::post('/settings/language', [EmployeeController::class, 'updateLanguage'])->name('settings.language');
     });
 });
 
@@ -83,6 +88,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
         Route::post('/settings/datetime', [SettingsController::class, 'updateDatetime'])->name('settings.datetime');
+        Route::post('/settings/language', [SettingsController::class, 'updateLanguage'])->name('settings.language');
 
         // Company & theme — admin only
         Route::middleware('role:admin')->post('/settings/company', [SettingsController::class, 'updateCompany'])->name('settings.company');
@@ -104,6 +110,6 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/settings', [EmployeeController::class, 'settings'])->name('settings');
         Route::post('/settings/profile',  [EmployeeController::class, 'updateProfile'])->name('settings.profile');
         Route::post('/settings/password', [EmployeeController::class, 'updatePassword'])->name('settings.password');
-        Route::post('/settings/location', [EmployeeController::class, 'updateLocation'])->name('settings.location');
+        Route::post('/settings/timezone', [EmployeeController::class, 'updateTimezone'])->name('settings.timezone');
     });
 });

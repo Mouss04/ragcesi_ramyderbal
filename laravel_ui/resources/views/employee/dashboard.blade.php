@@ -263,17 +263,17 @@
         @endif
     </div>
     <div class="emp-banner-info">
-        <div class="emp-banner-name">Bonjour, {{ auth()->user()->name }} 👋</div>
+        <div class="emp-banner-name">{{ __('Hello,') }} {{ auth()->user()->name }} </div>
         <div class="emp-banner-sub">
             @if(auth()->user()->location)
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 {{ auth()->user()->location }} &bull;
             @endif
-            Posez une question à l'IA de votre entreprise
+            {{ __('Ask a question to your company\'s AI') }}
         </div>
     </div>
     <div style="z-index:1;text-align:right;">
-        <div style="font-size:0.75rem;color:rgba(255,255,255,0.65);">{{ now()->locale('fr')->isoFormat('dddd D MMMM YYYY') }}</div>
+        <div id="emp-date" style="font-size:0.75rem;color:rgba(255,255,255,0.65);"></div>
     </div>
 </div>
 
@@ -289,8 +289,8 @@
                 </svg>
             </div>
             <div>
-                <div class="chat-head-title">Assistant IA</div>
-                <div class="chat-head-sub">Interrogez vos documents d'entreprise</div>
+                <div class="chat-head-title">{{ __('AI Assistant') }}</div>
+                <div class="chat-head-sub">{{ __('Query your company documents') }}</div>
             </div>
         </div>
 
@@ -300,7 +300,7 @@
                 <div class="msg-avatar bot">IA</div>
                 <div>
                     <div class="msg-bubble bot">
-                        Bonjour ! Je suis votre assistant IA. Posez-moi n'importe quelle question sur vos documents d'entreprise et je vous répondrai du mieux possible.
+                        {{ __('Hello! I am your AI assistant. Ask me any question about your company documents and I will answer as best I can.') }}
                     </div>
                     <div class="msg-time">Maintenant</div>
                 </div>
@@ -319,7 +319,7 @@
         </div>
 
         <div class="chat-input-area">
-            <textarea id="question-input" placeholder="Posez votre question ici…" rows="1"
+            <textarea id="question-input" placeholder="{{ __('Ask your question here…') }}" rows="1"
                       onkeydown="handleKey(event)"></textarea>
             <button class="chat-send-btn" id="send-btn" onclick="sendQuestion()" title="Envoyer">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -332,9 +332,9 @@
     {{-- Right panel --}}
     <div class="side-panel">
         <div class="tip-card">
-            <div class="tip-card-title">
+                <div class="tip-card-title">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Dernières conversations
+                {{ __('Latest conversations') }}
             </div>
             <div style="max-height:420px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent;">
             @forelse($recentSessions as $s)
@@ -346,12 +346,12 @@
                         </div>
                         <div>
                             <div class="tip-text">{{ Str::limit($s->first_question, 50) }}</div>
-                            <div class="tip-sub">{{ $s->messages_count }} msg · {{ $s->last_at->locale('fr')->diffForHumans() }}</div>
+                            <div class="tip-sub">{{ $s->messages_count }} msg · {{ $s->last_at->locale(app()->getLocale())->diffForHumans() }}</div>
                         </div>
                     </div>
                 </a>
             @empty
-                <div style="font-size:0.82rem;color:#9bb0b0;padding:0.4rem 0;">Aucune conversation récente.</div>
+                <div style="font-size:0.82rem;color:#9bb0b0;padding:0.4rem 0;">{{ __('No recent conversations.') }}</div>
             @endforelse
             </div>
         </div>
@@ -367,7 +367,7 @@
         <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,0.15);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </span>
-        nouvelle conversation
+        {{ __('New conversation') }}
     </a>
 </div>
 
@@ -386,8 +386,20 @@ const sendBtn = document.getElementById('send-btn');
 const typingRow = document.getElementById('typing-row');
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+const _appLocale = '{{ app()->getLocale() === "fr" ? "fr-FR" : "en-GB" }}';
+const _appTZ    = '{{ auth()->user()->timezone ?? "Africa/Algiers" }}';
+
+(function updateEmpDate() {
+    const el = document.getElementById('emp-date');
+    if (el) {
+        const d = new Date(new Date().toLocaleString('en-US', { timeZone: _appTZ }));
+        el.textContent = d.toLocaleDateString(_appLocale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    setTimeout(updateEmpDate, 60000);
+})();
+
 function now() {
-    return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    return new Date().toLocaleTimeString(_appLocale, { hour: '2-digit', minute: '2-digit' });
 }
 
 function handleKey(e) {

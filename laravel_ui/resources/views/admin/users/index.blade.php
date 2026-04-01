@@ -218,12 +218,12 @@
     {{-- Header --}}
     <div class="page-header">
         <div>
-            <div class="page-header-title">Gestion des utilisateurs</div>
-            <div class="page-header-sub">Créer, modifier et supprimer les comptes employés et administrateurs.</div>
+            <div class="page-header-title">{{ __('User management') }}</div>
+            <div class="page-header-sub">{{ __('Create, edit and delete employee and administrator accounts.') }}</div>
         </div>
         <button type="button" class="btn btn-primary" onclick="openCreateModal()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nouvel utilisateur
+            {{ __('New user') }}
         </button>
     </div>
 
@@ -238,7 +238,7 @@
             </div>
             <div>
                 <div class="user-stat-val">{{ $users->count() }}</div>
-                <div class="user-stat-label">Total utilisateurs</div>
+                <div class="user-stat-label">{{ __('Total users') }}</div>
             </div>
         </div>
         <div class="user-stat">
@@ -249,7 +249,7 @@
             </div>
             <div>
                 <div class="user-stat-val">{{ $users->where('role','admin')->count() }}</div>
-                <div class="user-stat-label">Administrateurs</div>
+                <div class="user-stat-label">{{ __('Administrators') }}</div>
             </div>
         </div>
         <div class="user-stat">
@@ -261,7 +261,7 @@
             </div>
             <div>
                 <div class="user-stat-val">{{ $users->where('role','supervisor')->count() }}</div>
-                <div class="user-stat-label">Superviseurs</div>
+                <div class="user-stat-label">{{ __('Supervisors') }}</div>
             </div>
         </div>
     </div>
@@ -270,7 +270,7 @@
     @if($users->isEmpty())
         <div class="empty-state">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#6b8080" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-            <p>Aucun utilisateur trouvé.</p>
+            <p>{{ __('No user found.') }}</p>
         </div>
     @else
         <div class="user-grid">
@@ -297,21 +297,21 @@
                     @if($isAdmin)
                         <span class="user-card-badge badge-admin">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            Admin
+                            {{ __('Administrator') }}
                         </span>
                     @elseif($isSupervisor)
                         <span class="user-card-badge badge-supervisor">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                            Superviseur
+                            {{ __('Supervisor') }}
                         </span>
                     @else
                         <span class="user-card-badge badge-user">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            Employé
+                            {{ __('Employee') }}
                         </span>
                     @endif
                     <div class="user-card-date">
-                        Depuis {{ $user->created_at?->locale('fr')->diffForHumans() }}
+                        {{ __('Since') }} {{ $user->created_at?->locale(app()->getLocale())->diffForHumans() }}
                     </div>
                     <div class="user-card-actions">
                         @unless(auth()->user()->role === 'supervisor' && $user->role === 'admin')
@@ -319,13 +319,13 @@
                                 onclick="openEditModal({{ $user->id }}, {{ Js::from($user->name) }}, '{{ $user->role }}', {{ Js::from($user->avatar ? Storage::url($user->avatar) : '') }})"
                                 title="Modifier">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            Modifier
+                            {{ __('Edit') }}
                         </button>
-                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');" style="flex:1;display:flex;">
+                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('{{ __('Delete this user?') }}');" style="flex:1;display:flex;">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-danger" style="flex:1;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                                Supprimer
+                                {{ __('Delete') }}
                             </button>
                         </form>
                         @endunless
@@ -343,10 +343,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </div>
             <div>
-                <div class="edit-modal-htitle">Créer un utilisateur</div>
-                <div class="edit-modal-hsub">Nouveau compte employé ou administrateur</div>
+                <div class="edit-modal-htitle">{{ __('Create a user') }}</div>
+                <div class="edit-modal-hsub">{{ __('New employee or administrator account') }}</div>
             </div>
-            <button class="edit-modal-close" type="button" onclick="closeCreateModal()" title="Fermer">
+            <button class="edit-modal-close" type="button" onclick="closeCreateModal()" title="{{ __('Close') }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -356,7 +356,7 @@
             <div class="edit-modal-body">
                 {{-- Avatar upload --}}
                 <div class="edit-field">
-                    <label>Photo de profil <span style="color:#9bb0b0;font-weight:500;">(optionnelle)</span></label>
+                    <label>{{ __('Profile picture') }} <span style="color:#9bb0b0;font-weight:500;">({{ __('optional') }})</span></label>
                     <div class="modal-avatar-drop" onclick="document.getElementById('create-avatar-input').click()">
                         <input type="file" id="create-avatar-input" name="avatar" accept="image/*"
                                onchange="previewModalAvatar(this,'create-av-preview')">
@@ -366,38 +366,38 @@
                             </span>
                         </div>
                         <div>
-                            <div class="modal-av-info-title">Choisir une photo</div>
+                            <div class="modal-av-info-title">{{ __('Choose a photo') }}</div>
                             <div class="modal-av-info-sub">JPG, PNG · max 2 Mo</div>
                         </div>
                     </div>
                 </div>
                 <div class="edit-field">
-                    <label for="create-name">Nom d'utilisateur</label>
+                    <label for="create-name">{{ __('Username') }}</label>
                     <input type="text" id="create-name" name="name"
                            value="{{ old('name') }}" required placeholder="Ex: jean.dupont">
                 </div>
                 <div class="edit-field">
-                    <label for="create-role">Rôle</label>
+                    <label for="create-role">{{ __('Role') }}</label>
                     <select id="create-role" name="role" required>
-                        <option value="user" {{ old('role','user') === 'user' ? 'selected' : '' }}>Employé</option>
-                        <option value="supervisor" {{ old('role') === 'supervisor' ? 'selected' : '' }}>Superviseur</option>
+                        <option value="user" {{ old('role','user') === 'user' ? 'selected' : '' }}>{{ __('Employee') }}</option>
+                        <option value="supervisor" {{ old('role') === 'supervisor' ? 'selected' : '' }}>{{ __('Supervisor') }}</option>
                         @if(auth()->user()->role === 'admin')
-                        <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrateur</option>
+                        <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Administrator') }}</option>
                         @endif
                     </select>
                 </div>
                 <div class="edit-field">
-                    <label for="create-password">Mot de passe</label>
+                    <label for="create-password">{{ __('Password') }}</label>
                     <input type="password" id="create-password" name="password"
-                           required placeholder="Minimum 8 caractères">
-                    <div class="edit-field-hint">Minimum 8 caractères</div>
+                           required placeholder="{{ __('Min. 8 characters') }}">
+                    <div class="edit-field-hint">{{ __('Min. 8 characters') }}</div>
                 </div>
             </div>
             <div class="edit-modal-footer">
-                <button type="button" class="edit-btn-cancel" onclick="closeCreateModal()">Annuler</button>
+                <button type="button" class="edit-btn-cancel" onclick="closeCreateModal()">{{ __('Cancel') }}</button>
                 <button type="submit" class="edit-btn-save">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Créer le compte
+                    {{ __('Create account') }}
                 </button>
             </div>
         </form>
@@ -410,10 +410,10 @@
         <div class="edit-modal-header">
             <div class="edit-modal-avatar" id="modal-avatar"></div>
             <div>
-                <div class="edit-modal-htitle">Modifier l'utilisateur</div>
-                <div class="edit-modal-hsub" id="modal-subtitle">Modifier les informations du compte</div>
+                <div class="edit-modal-htitle">{{ __('Edit user') }}</div>
+                <div class="edit-modal-hsub" id="modal-subtitle">{{ __('Edit account information') }}</div>
             </div>
-            <button class="edit-modal-close" type="button" onclick="closeEditModal()" title="Fermer">
+            <button class="edit-modal-close" type="button" onclick="closeEditModal()" title="{{ __('Close') }}">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -424,7 +424,7 @@
             <div class="edit-modal-body">
                 {{-- Avatar upload --}}
                 <div class="edit-field">
-                    <label>Photo de profil <span style="color:#9bb0b0;font-weight:500;">(optionnelle)</span></label>
+                    <label>{{ __('Profile picture') }} <span style="color:#9bb0b0;font-weight:500;">({{ __('optional') }})</span></label>
                     <div class="modal-avatar-drop" onclick="document.getElementById('edit-avatar-input').click()">
                         <input type="file" id="edit-avatar-input" name="avatar" accept="image/*"
                                onchange="previewModalAvatar(this,'edit-av-preview')">
@@ -432,36 +432,36 @@
                             <span id="edit-av-initials"></span>
                         </div>
                         <div>
-                            <div class="modal-av-info-title">Changer la photo</div>
+                            <div class="modal-av-info-title">{{ __('Change photo') }}</div>
                             <div class="modal-av-info-sub">JPG, PNG · max 2 Mo</div>
                         </div>
                     </div>
                 </div>
                 <div class="edit-field">
-                    <label for="modal-name">Nom d'utilisateur</label>
-                    <input type="text" id="modal-name" name="name" required placeholder="Nom d'affichage">
+                    <label for="modal-name">{{ __('Username') }}</label>
+                    <input type="text" id="modal-name" name="name" required placeholder="{{ __('Display name') }}">
                 </div>
                 <div class="edit-field">
-                    <label for="modal-role">Rôle</label>
+                    <label for="modal-role">{{ __('Role') }}</label>
                     <select id="modal-role" name="role" required>
-                        <option value="user">Employé</option>
-                        <option value="supervisor">Superviseur</option>
+                        <option value="user">{{ __('Employee') }}</option>
+                        <option value="supervisor">{{ __('Supervisor') }}</option>
                         @if(auth()->user()->role === 'admin')
-                        <option value="admin">Administrateur</option>
+                        <option value="admin">{{ __('Administrator') }}</option>
                         @endif
                     </select>
                 </div>
                 <div class="edit-field">
-                    <label for="modal-password">Nouveau mot de passe <span style="color:#9bb0b0;font-weight:500;">(optionnel)</span></label>
-                    <input type="password" id="modal-password" name="password" placeholder="Laisser vide pour ne pas changer">
-                    <div class="edit-field-hint">Minimum 8 caractères</div>
+                    <label for="modal-password">{{ __('New password') }} <span style="color:#9bb0b0;font-weight:500;">({{ __('optional') }})</span></label>
+                    <input type="password" id="modal-password" name="password" placeholder="{{ __('Leave blank to keep unchanged') }}">
+                    <div class="edit-field-hint">{{ __('Min. 8 characters') }}</div>
                 </div>
             </div>
             <div class="edit-modal-footer">
-                <button type="button" class="edit-btn-cancel" onclick="closeEditModal()">Annuler</button>
+                <button type="button" class="edit-btn-cancel" onclick="closeEditModal()">{{ __('Cancel') }}</button>
                 <button type="submit" class="edit-btn-save">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    Enregistrer
+                    {{ __('Save') }}
                 </button>
             </div>
         </form>

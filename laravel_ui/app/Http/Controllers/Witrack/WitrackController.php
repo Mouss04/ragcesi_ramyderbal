@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Witrack;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class WitrackController extends Controller
@@ -68,5 +70,60 @@ class WitrackController extends Controller
 
         return redirect()->route('witrack.dashboard')
             ->with('status', "Entreprise supprimée.");
+    }
+
+    /**
+     * Show the settings page.
+     */
+    public function settings(): View
+    {
+        return view('witrack.settings');
+    }
+
+    /**
+     * Update witrack agent profile (name + avatar).
+     */
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'name'   => ['required', 'string', 'max:100', 'unique:users,name,' . $user->id],
+            'avatar' => ['nullable', 'image', 'max:2048'],
+        ]);
+
+        $data = ['name' => $request->name];
+
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $user->update($data);
+
+        return back()->with('status', 'Profil mis à jour.');
+    }
+
+    /**
+     * Update witrack agent password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => ['required'],
+            'password'         => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = auth()->user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Mot de passe actuel incorrect.']);
+        }
+
+        $user->update(['password' => Hash::make($request->password)]);
+
+        return back()->with('status', 'Mot de passe modifié.');
     }
 }

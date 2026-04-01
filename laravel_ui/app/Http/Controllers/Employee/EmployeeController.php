@@ -99,7 +99,9 @@ class EmployeeController extends Controller
 
     public function settings(): View
     {
-        return view('employee.settings');
+        return view('employee.settings', [
+            'timezones' => \DateTimeZone::listIdentifiers(),
+        ]);
     }
 
     public function updateProfile(Request $request): RedirectResponse
@@ -143,14 +145,23 @@ class EmployeeController extends Controller
         return back()->with('status', 'Mot de passe modifié.');
     }
 
-    public function updateLocation(Request $request): RedirectResponse
+    public function updateTimezone(Request $request): RedirectResponse
+    {
+        $request->validate(['timezone' => ['required', 'timezone']]);
+
+        auth()->user()->update(['timezone' => $request->timezone]);
+
+        return back()->with('status', 'Fuseau horaire mis à jour.');
+    }
+
+    public function updateLanguage(Request $request): RedirectResponse
     {
         $request->validate([
-            'location' => ['nullable', 'string', 'max:150'],
+            'locale' => ['required', 'in:fr,en'],
         ]);
 
-        auth()->user()->update(['location' => $request->location]);
+        session(['locale' => $request->locale]);
 
-        return back()->with('status', 'Localisation mise à jour.');
+        return back()->with('status', 'Langue mise à jour.')->with('_lang_tab', true);
     }
 }

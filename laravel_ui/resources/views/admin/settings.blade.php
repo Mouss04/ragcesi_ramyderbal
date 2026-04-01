@@ -483,7 +483,7 @@
 
     <div class="hero-info">
         <div class="hero-name">{{ auth()->user()->name }}</div>
-        <div class="hero-role">Administrateur du système</div>
+        <div class="hero-role">{{ __('System Administrator') }}</div>
         <div class="hero-badges">
             <span class="hero-badge">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -498,7 +498,7 @@
 
     <button type="button" class="hero-edit-btn" onclick="switchTab('profile', document.querySelector('[data-tab=profile]'))">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Modifier le profil
+        {{ __('Edit profile') }}
     </button>
 </div>
 
@@ -507,15 +507,15 @@
 
     {{-- ── Left Nav ── --}}
     <nav class="settings-nav">
-        <div class="snav-label">Mon compte</div>
+        <div class="snav-label">{{ __('My account') }}</div>
 
         <button class="snav-item active" data-tab="profile" onclick="switchTab('profile',this)" type="button">
             <div class="snav-icon" style="background:#e6f4f4;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c7070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div class="snav-text">
-                <span class="snav-title">Profil</span>
-                <span class="snav-desc">Nom & photo</span>
+                <span class="snav-title">{{ __('Profile') }}</span>
+                <span class="snav-desc">{{ __('Name & photo') }}</span>
             </div>
         </button>
 
@@ -524,13 +524,13 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             </div>
             <div class="snav-text">
-                <span class="snav-title">Mot de passe</span>
-                <span class="snav-desc">Sécurité du compte</span>
+                <span class="snav-title">{{ __('Password') }}</span>
+                <span class="snav-desc">{{ __('Account security') }}</span>
             </div>
         </button>
 
         <div class="snav-divider"></div>
-        <div class="snav-label">Personnalisation</div>
+        <div class="snav-label">{{ __('Customization') }}</div>
 
         @if(auth()->user()->role === 'admin')
         <button class="snav-item" data-tab="company" onclick="switchTab('company',this)" type="button">
@@ -538,8 +538,8 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
             </div>
             <div class="snav-text">
-                <span class="snav-title">Entreprise & Thème</span>
-                <span class="snav-desc">Logo & couleurs</span>
+                <span class="snav-title">{{ __('Company & Theme') }}</span>
+                <span class="snav-desc">{{ __('Logo & colors') }}</span>
             </div>
         </button>
         @endif
@@ -549,8 +549,18 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div class="snav-text">
-                <span class="snav-title">Date & Heure</span>
-                <span class="snav-desc">Fuseau horaire</span>
+                <span class="snav-title">{{ __('Date & Time') }}</span>
+                <span class="snav-desc">{{ __('Timezone') }}</span>
+            </div>
+        </button>
+
+        <button class="snav-item" data-tab="language" onclick="switchTab('language',this)" type="button">
+            <div class="snav-icon" style="background:#fdf4ff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div class="snav-text">
+                <span class="snav-title">{{ __('Language') }}</span>
+                <span class="snav-desc">{{ __('Display language') }}</span>
             </div>
         </button>
     </nav>
@@ -566,8 +576,8 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0c7070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </div>
                     <div>
-                        <div class="scard-htitle">Informations du profil</div>
-                        <div class="scard-hsub">Photo de profil et nom affiché</div>
+                        <div class="scard-htitle">{{ __('Profile information') }}</div>
+                        <div class="scard-hsub">{{ __('Profile picture and display name') }}</div>
                     </div>
                 </div>
                 <div class="scard-body">
@@ -587,21 +597,21 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="av-info-title">Changer la photo de profil</div>
-                                <div class="av-info-sub">JPG, PNG ou GIF · max 2 Mo</div>
+                                <div class="av-info-title">{{ __('Change profile picture') }}</div>
+                                <div class="av-info-sub">{{ __('JPG, PNG or GIF · max 2 MB') }}</div>
                             </div>
                             <div class="av-btn">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg>
-                                Parcourir
+                                {{ __('Browse') }}
                             </div>
                             <input type="file" id="avatar-input" name="avatar" accept="image/*" style="display:none;" onchange="previewAvatar(this)">
                         </label>
 
                         <div class="form-group">
-                            <label for="name">Nom d'affichage</label>
+                            <label for="name">{{ __('Display name') }}</label>
                             <input type="text" id="name" name="name"
                                    value="{{ old('name', auth()->user()->name) }}"
-                                   placeholder="Votre nom complet" required>
+                                   placeholder="{{ __('Your full name') }}" required>
                             @error('name')
                                 <div class="form-hint" style="color:#dc2626;">{{ $message }}</div>
                             @enderror
@@ -609,14 +619,14 @@
 
                         <div class="info-band">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                            Le nom doit être unique. Il apparaît dans la barre latérale.
+                            {{ __('The name must be unique. It appears in the sidebar.') }}
                         </div>
 
                         <div class="form-actions">
-                            <button type="button" class="btn-cancel" onclick="document.getElementById('name').value='{{ auth()->user()->name }}'">Annuler</button>
+                            <button type="button" class="btn-cancel" onclick="document.getElementById('name').value='{{ auth()->user()->name }}'">{{ __('Cancel') }}</button>
                             <button type="submit" class="btn-save">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                Enregistrer
+                                {{ __('Save') }}
                             </button>
                         </div>
                     </form>
@@ -632,8 +642,8 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d4a017" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                     </div>
                     <div>
-                        <div class="scard-htitle">Changer le mot de passe</div>
-                        <div class="scard-hsub">Choisissez un mot de passe fort (min. 8 caractères)</div>
+                        <div class="scard-htitle">{{ __('Change password') }}</div>
+                        <div class="scard-hsub">{{ __('Choose a strong password (min. 8 characters)') }}</div>
                     </div>
                 </div>
                 <div class="scard-body">
@@ -641,7 +651,7 @@
                         @csrf
 
                         <div class="form-group">
-                            <label for="current_password">Mot de passe actuel</label>
+                            <label for="current_password">{{ __('Current password') }}</label>
                             <div class="pw-wrap">
                                 <input type="password" id="current_password" name="current_password" placeholder="••••••••" required>
                                 <button class="pw-toggle" type="button" onclick="togglePw('current_password',this)">
@@ -655,7 +665,7 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="password">Nouveau mot de passe</label>
+                                <label for="password">{{ __('New password') }}</label>
                                 <div class="pw-wrap">
                                     <input type="password" id="password" name="password" placeholder="••••••••" required
                                            oninput="checkStrength(this.value)">
@@ -665,7 +675,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="password_confirmation">Confirmer le mot de passe</label>
+                                <label for="password_confirmation">{{ __('Confirm password') }}</label>
                                 <div class="pw-wrap">
                                     <input type="password" id="password_confirmation" name="password_confirmation" placeholder="••••••••" required>
                                     <button class="pw-toggle" type="button" onclick="togglePw('password_confirmation',this)">
@@ -692,7 +702,7 @@
                         <div class="form-actions">
                             <button type="submit" class="btn-save">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-                                Mettre à jour
+                                {{ __('Update password') }}
                             </button>
                         </div>
                     </form>
@@ -709,8 +719,8 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
                     </div>
                     <div>
-                        <div class="scard-htitle">Identité de l'entreprise</div>
-                        <div class="scard-hsub">Nom, logo et couleur principale de l'interface</div>
+                        <div class="scard-htitle">{{ __('Company identity') }}</div>
+                        <div class="scard-hsub">{{ __('Company name, logo and primary interface color') }}</div>
                     </div>
                 </div>
                 <div class="scard-body">
@@ -718,7 +728,7 @@
                         @csrf
 
                         <div class="form-group">
-                            <label for="company_name">Nom de l'entreprise</label>
+                            <label for="company_name">{{ __('Company name') }}</label>
                             <input type="text" id="company_name" name="company_name"
                                    value="{{ old('company_name', $siteSetting->company_name) }}"
                                    placeholder="Ex: Acme Corp">
@@ -726,7 +736,7 @@
 
                         {{-- Logo upload --}}
                         <div class="form-group">
-                            <label>Logo de l'entreprise</label>
+                            <label>{{ __('Company logo') }}</label>
                             {{-- visual drop zone (clicking it triggers the hidden input below) --}}
                             <div class="logo-drop" id="logo-drop-area" onclick="document.getElementById('company_logo').click()" style="cursor:pointer;">
                                 <div id="logo-drop-content">
@@ -736,8 +746,8 @@
                                         <div class="logo-drop-icon">
                                             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                         </div>
-                                        <div class="logo-drop-label">Glissez un fichier ici ou cliquez pour parcourir</div>
-                                        <div class="logo-drop-sub">PNG, SVG, JPG · max 4 Mo</div>
+                                        <div class="logo-drop-label">{{ __('Drag a file here or click to browse') }}</div>
+                                        <div class="logo-drop-sub">{{ __('PNG, SVG, JPG · max 4 MB') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -747,7 +757,7 @@
 
                         {{-- Theme color --}}
                         <div class="form-group">
-                            <label>Couleur principale</label>
+                            <label>{{ __('Primary color') }}</label>
                             <div class="color-grid" id="color-grid">
                                 @php $currentColor = old('theme_color', $siteSetting->theme_color ?? '#0c7070'); @endphp
                                 @foreach(['#0c7070','#6366f1','#e11d48','#d4a017','#0891b2','#16a34a','#7c3aed','#ea580c'] as $c)
@@ -769,7 +779,7 @@
 
                         {{-- Preview strip --}}
                         <div class="form-group">
-                            <label>Aperçu du thème</label>
+                            <label>{{ __('Theme preview') }}</label>
                             <div class="theme-preview">
                                 <div class="theme-sidebar-mock" id="theme-sidebar-mock" style="background:{{ $currentColor }};">
                                     <div class="theme-sidebar-dot active"></div>
@@ -789,7 +799,7 @@
                         <div class="form-actions">
                             <button type="submit" class="btn-save">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                Enregistrer
+                                {{ __('Save') }}
                             </button>
                         </div>
                     </form>
@@ -806,8 +816,8 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     </div>
                     <div>
-                        <div class="scard-htitle">Date &amp; Fuseau horaire</div>
-                        <div class="scard-hsub">Heure locale affichée dans le tableau de bord</div>
+                        <div class="scard-htitle">{{ __('Date & Timezone') }}</div>
+                        <div class="scard-hsub">{{ __('Local time displayed in the dashboard') }}</div>
                     </div>
                 </div>
                 <div class="scard-body">
@@ -828,7 +838,7 @@
                     <form method="POST" action="{{ route('admin.settings.datetime') }}">
                         @csrf
                         <div class="form-group">
-                            <label for="timezone">Fuseau horaire</label>
+                            <label for="timezone">{{ __('Timezone') }}</label>
                             <select name="timezone" id="timezone">
                                 @foreach($timezones as $tz)
                                     <option value="{{ $tz }}" {{ (auth()->user()->timezone ?? 'Africa/Algiers') === $tz ? 'selected' : '' }}>
@@ -841,7 +851,57 @@
                         <div class="form-actions">
                             <button type="submit" class="btn-save">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                Enregistrer
+                                {{ __('Save') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- ═══════ LANGUAGE ═══════ --}}
+        <div class="settings-panel" id="panel-language">
+            <div class="scard">
+                <div class="scard-head" style="--accent:#9333ea;">
+                    <div class="scard-hicon" style="background:#fdf4ff;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                    <div>
+                        <div class="scard-htitle">{{ __('Interface language') }}</div>
+                        <div class="scard-hsub">{{ __('Choose the display language of the application') }}</div>
+                    </div>
+                </div>
+                <div class="scard-body">
+                    <form method="POST" action="{{ route('admin.settings.language') }}">
+                        @csrf
+                        @php $currentLocale = session('locale', config('app.locale', 'fr')); @endphp
+
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;">
+                            <label style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.4rem 1rem;border:2px solid {{ $currentLocale === 'fr' ? '#9333ea' : '#dde8e8' }};border-radius:14px;cursor:pointer;background:{{ $currentLocale === 'fr' ? '#fdf4ff' : '#fff' }};transition:150ms ease;" id="adm-card-fr" onclick="admSelectLang('fr')">
+                                <input type="radio" name="locale" value="fr" {{ $currentLocale === 'fr' ? 'checked' : '' }} style="position:absolute;opacity:0;pointer-events:none;">
+                                <span style="font-size:2.2rem;line-height:1;">🇫🇷</span>
+                                <span style="font-size:.9rem;font-weight:700;color:#1e2c2c;">Français</span>
+                                <span style="font-size:.74rem;color:#6b8080;">French</span>
+                                <span id="adm-check-fr" style="width:20px;height:20px;border-radius:50%;border:2px solid {{ $currentLocale === 'fr' ? '#9333ea' : '#c4d8d8' }};display:grid;place-items:center;background:{{ $currentLocale === 'fr' ? '#9333ea' : 'transparent' }};">
+                                    @if($currentLocale === 'fr')<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:block;"></span>@endif
+                                </span>
+                            </label>
+
+                            <label style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.4rem 1rem;border:2px solid {{ $currentLocale === 'en' ? '#9333ea' : '#dde8e8' }};border-radius:14px;cursor:pointer;background:{{ $currentLocale === 'en' ? '#fdf4ff' : '#fff' }};transition:150ms ease;" id="adm-card-en" onclick="admSelectLang('en')">
+                                <input type="radio" name="locale" value="en" {{ $currentLocale === 'en' ? 'checked' : '' }} style="position:absolute;opacity:0;pointer-events:none;">
+                                <span style="font-size:2.2rem;line-height:1;">🇬🇧</span>
+                                <span style="font-size:.9rem;font-weight:700;color:#1e2c2c;">English</span>
+                                <span style="font-size:.74rem;color:#6b8080;">Anglais</span>
+                                <span id="adm-check-en" style="width:20px;height:20px;border-radius:50%;border:2px solid {{ $currentLocale === 'en' ? '#9333ea' : '#c4d8d8' }};display:grid;place-items:center;background:{{ $currentLocale === 'en' ? '#9333ea' : 'transparent' }};">
+                                    @if($currentLocale === 'en')<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:block;"></span>@endif
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                {{ __('Save language') }}
                             </button>
                         </div>
                     </form>
@@ -1013,6 +1073,26 @@ function checkStrength(val) {
     document.getElementById('pw-strength-label').style.color = colors[score - 1] || colors[0];
 }
 
+/* ── Language card toggle ── */
+function admSelectLang(code) {
+    ['fr','en'].forEach(c => {
+        const card  = document.getElementById('adm-card-' + c);
+        const check = document.getElementById('adm-check-' + c);
+        const radio = card ? card.querySelector('input[type=radio]') : null;
+        const active = c === code;
+        if (card) {
+            card.style.borderColor = active ? '#9333ea' : '#dde8e8';
+            card.style.background  = active ? '#fdf4ff' : '#fff';
+        }
+        if (check) {
+            check.style.borderColor = active ? '#9333ea' : '#c4d8d8';
+            check.style.background  = active ? '#9333ea' : 'transparent';
+            check.innerHTML = active ? '<span style="width:6px;height:6px;border-radius:50%;background:#fff;display:block;"></span>' : '';
+        }
+        if (radio) radio.checked = active;
+    });
+}
+
 /* ── Live clock (respects the user's saved timezone) ── */
 const SETTINGS_TZ = '{{ auth()->user()->timezone ?? 'Africa/Algiers' }}';
 function updateClock() {
@@ -1071,10 +1151,10 @@ setInterval(updateClock, 1000);
         </div>
 
         <div class="crop-actions">
-            <button type="button" class="crop-btn-cancel" onclick="closeCropModal()">Annuler</button>
+            <button type="button" class="crop-btn-cancel" onclick="closeCropModal()">{{ __('Cancel') }}</button>
             <button type="button" class="crop-btn-save" onclick="applyCrop()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>
-                Enregistrer la photo
+                {{ __('Save photo') }}
             </button>
         </div>
     </div>

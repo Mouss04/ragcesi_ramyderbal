@@ -4,7 +4,7 @@
 <style>
 /* ── Hero ── */
 .doc-hero {
-    background: linear-gradient(135deg, #0c7070 0%, #14a8a8 55%, #1fd0d0 100%);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-mid) 55%, var(--teal-light) 100%);
     border-radius: 18px;
     padding: 1.5rem 2rem;
     display: flex;
@@ -13,7 +13,7 @@
     gap: 1.5rem;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 6px 28px rgba(12,112,112,0.22);
+    box-shadow: 0 6px 28px var(--teal-shadow);
     margin-bottom: 1.6rem;
 }
 .doc-hero::before {
@@ -51,29 +51,30 @@
 /* ── Document card ── */
 .doc-card {
     background: #fff;
-    border: 1.5px solid #dde8e8;
+    border: 1.5px solid var(--line);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(12,112,112,0.07);
+    box-shadow: 0 2px 12px var(--teal-shadow);
     transition: box-shadow 180ms, transform 180ms;
     display: flex;
     flex-direction: column;
 }
 .doc-card:hover {
-    box-shadow: 0 8px 28px rgba(12,112,112,0.16);
+    box-shadow: 0 8px 28px var(--teal-shadow);
     transform: translateY(-2px);
 }
 .doc-card-stripe {
     height: 4px;
-    background: linear-gradient(90deg, #0c7070, #14a8a8);
+    background: linear-gradient(90deg, var(--teal), var(--teal-mid));
 }
 .doc-card-body { padding: 1.1rem 1.3rem; flex:1; }
 .doc-card-icon {
     width: 44px; height: 44px; border-radius: 12px;
-    background: #e6f4f4;
+    background: var(--teal-soft);
     display: grid; place-items: center;
     margin-bottom: 0.9rem;
 }
+.doc-card-icon svg { color: var(--teal); }
 .doc-card-title {
     font-size: 0.93rem;
     font-weight: 700;
@@ -91,9 +92,28 @@
 }
 .doc-card-footer {
     padding: 0.8rem 1.3rem;
-    border-top: 1px solid #edf2f2;
+    border-top: 1px solid var(--line);
     display: flex;
     justify-content: flex-end;
+}
+.doc-view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: 140ms;
+}
+.doc-view-btn:hover {
+    border-color: var(--teal);
+    color: var(--teal);
 }
 
 /* ── Search ── */
@@ -102,11 +122,11 @@
     align-items: center;
     gap: 0.75rem;
     background: #fff;
-    border: 1.5px solid #dde8e8;
+    border: 1.5px solid var(--line);
     border-radius: 12px;
     padding: 0.55rem 1rem;
     margin-bottom: 1.2rem;
-    box-shadow: 0 1px 6px rgba(12,112,112,0.06);
+    box-shadow: 0 1px 6px var(--teal-shadow);
 }
 .search-bar input {
     border: none;
@@ -199,13 +219,13 @@
             </svg>
         </div>
         <div>
-            <div class="doc-hero-title">Bibliothèque de documents</div>
-            <div class="doc-hero-sub">Consultez les documents partagés par l'entreprise</div>
+            <div class="doc-hero-title">{{ __('Document library') }}</div>
+            <div class="doc-hero-sub">{{ __('Browse documents shared by the company') }}</div>
         </div>
     </div>
     <div class="doc-count-pill">
         <div class="doc-count-num">{{ $documents->count() }}</div>
-        <div class="doc-count-label">Documents</div>
+        <div class="doc-count-label">{{ __('Documents') }}</div>
     </div>
 </div>
 
@@ -214,7 +234,7 @@
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9bb0b0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    <input type="text" id="doc-search" placeholder="Rechercher un document…" oninput="filterDocs()" autocomplete="off">
+    <input type="text" id="doc-search" placeholder="{{ __('Search a document…') }}" oninput="filterDocs()" autocomplete="off">
 </div>
 
 {{-- Grid --}}
@@ -224,7 +244,7 @@
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
         </svg>
-        <p>Aucun document disponible pour le moment.</p>
+        <p>{{ __('No document available at the moment.') }}</p>
     </div>
 @else
     <div class="doc-grid" id="doc-grid">
@@ -232,13 +252,13 @@
             @php
                 $ext = pathinfo($doc->file_path, PATHINFO_EXTENSION);
                 $extColors = ['pdf' => '#dc2626', 'txt' => '#059669', 'md' => '#7c3aed'];
-                $extColor  = $extColors[strtolower($ext)] ?? '#0c7070';
+                $extColor  = $extColors[strtolower($ext)] ?? ($siteSetting->theme_color ?? '#0c7070');
             @endphp
             <div class="doc-card" data-title="{{ strtolower($doc->title) }}">
                 <div class="doc-card-stripe"></div>
                 <div class="doc-card-body">
                     <div class="doc-card-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0c7070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
                         </svg>
@@ -246,14 +266,11 @@
                     <div class="doc-card-title">{{ $doc->title }}</div>
                     <div class="doc-card-meta">
                         <span style="background:{{ $extColor }}22;color:{{ $extColor }};border-radius:5px;padding:1px 6px;font-weight:700;text-transform:uppercase;font-size:.7rem;">{{ strtoupper($ext) }}</span>
-                        {{ $doc->created_at->locale('fr')->isoFormat('D MMM YYYY') }}
+                        {{ $doc->created_at->locale(app()->getLocale())->isoFormat('D MMM YYYY') }}
                     </div>
                 </div>
                 <div class="doc-card-footer">
-                    <button onclick="openViewer({{ $doc->id }}, {{ Js::from($doc->title) }})"
-                        style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.45rem 0.9rem;border-radius:8px;border:1.5px solid #dde8e8;background:#fff;font:inherit;font-size:0.82rem;font-weight:600;color:#1e2c2c;cursor:pointer;transition:140ms;"
-                        onmouseover="this.style.borderColor='#0c7070';this.style.color='#0c7070';"
-                        onmouseout="this.style.borderColor='#dde8e8';this.style.color='#1e2c2c';">
+                    <button onclick="openViewer({{ $doc->id }}, {{ Js::from($doc->title) }})" class="doc-view-btn">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                         </svg>
@@ -269,12 +286,12 @@
 <div class="viewer-overlay" id="viewer-overlay" onclick="closeViewerOutside(event)">
     <div class="viewer-modal">
         <div class="viewer-header">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c7070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal);flex-shrink:0;">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
             </svg>
             <div class="viewer-title" id="viewer-title">Document</div>
-            <button class="viewer-close" onclick="closeViewer()" title="Fermer">
+            <button class="viewer-close" onclick="closeViewer()" title="{{ __('Close') }}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
@@ -286,7 +303,7 @@
         <div class="viewer-footer">
             <button onclick="closeViewer()"
                 style="padding:0.5rem 1.2rem;border-radius:9px;border:1.5px solid #dde8e8;background:#fff;font:inherit;font-size:0.84rem;font-weight:600;cursor:pointer;">
-                Fermer
+                {{ __('Close') }}
             </button>
         </div>
     </div>
