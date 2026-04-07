@@ -372,21 +372,21 @@
     </div>
 
     {{-- Right: brand / feature panel --}}
-    <div class="login-right">
-        <!-- Background watermark logos -->
-        <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:160px;bottom:-25px;left:-30px;transform:rotate(-15deg)" alt="">
-        <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:110px;top:10px;right:-20px;transform:rotate(20deg)" alt="">
-        <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:80px;top:45%;left:5px;transform:rotate(-5deg)" alt="">
-        <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:70px;bottom:15%;right:8px;transform:rotate(10deg)" alt="">
-        <img src="{{ asset('bagroung_logo.png') }}" alt="Witrack logo" class="panel-logo">
+   <div class="login-right">
+    <!-- Logos en arrière-plan (filigrane) -->
+    <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:160px;bottom:-25px;left:-30px;transform:rotate(-15deg)" alt="">
+    <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:110px;top:10px;right:-20px;transform:rotate(20deg)" alt="">
+    <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:80px;top:45%;left:5px;transform:rotate(-5deg)" alt="">
+    <img src="{{ asset('bagroung_logo.png') }}" class="wm-logo" style="width:70px;bottom:15%;right:8px;transform:rotate(10deg)" alt="">
+    <img src="{{ asset('bagroung_logo.png') }}" alt="Logo Witrack" class="panel-logo">
 
-        <p class="panel-title">Witrack</p>
-        <p class="panel-desc">Your enterprise knowledge portal, powered by AI.</p>
+    <p class="panel-title">Witrack</p>
+    <p class="panel-desc">Votre portail de connaissances d’entreprise, alimenté par l’IA.</p>
 
-        <p class="panel-quote">
-            Turn your documents into intelligent answers.
-        </p>
-    </div>
+    <p class="panel-quote">
+        Transformez vos documents en réponses intelligentes.
+    </p>
+</div>
 
 </div>
 

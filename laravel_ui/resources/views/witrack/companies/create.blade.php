@@ -204,9 +204,6 @@
 
     {{-- Hero --}}
     <div class="create-hero">
-        <div class="hero-icon-wrap">
-            <img src="{{ asset('logo_witrack.png') }}" alt="Witrack" style="width:40px;height:40px;object-fit:contain;">
-        </div>
         <div class="hero-text">
             <div class="hero-title">Nouvelle entreprise</div>
             <div class="hero-sub">Créez une entreprise et son compte administrateur en une seule étape</div>
@@ -240,7 +237,7 @@
                     <div class="input-icon-wrap">
                         <input type="text" id="company_name" name="company_name"
                                value="{{ old('company_name') }}"
-                               placeholder="Ex : Acme Corp"
+                               placeholder="Ex : Witrack"
                                required autocomplete="off">
                         <span class="icon-pfx">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>

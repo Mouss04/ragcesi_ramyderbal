@@ -277,12 +277,17 @@
 
 {{-- ── Sidebar ── --}}
 <aside class="sidebar">
-    <div class="sidebar-logo">
-        <div class="sidebar-badge">
-            <img src="{{ asset('logo_witrack.png') }}" alt="Witrack" style="height:38px;object-fit:contain;">
-        </div>
+  <div class="sidebar-logo">
+        <a href="{{ url('/') }}" class="nav-brand" style="display:flex;align-items:center;gap:.65rem;color:#fff;text-decoration:none;">
+            <img src="{{ asset('bagroung_logo.png') }}" alt="Witrack logo" class="nav-brand-logo" style="height:38px;object-fit:contain;">
+            <div class="nav-brand-text" style="display:flex;flex-direction:column;line-height:1.05;">
+                <span class="nav-brand-name" style="font-weight:800;letter-spacing:.03em;">Witrack</span>
+                <span class="nav-brand-sub" style="font-size:.65rem;font-weight:600;color:rgba(255,255,255,0.35);letter-spacing:.06em;text-transform:uppercase;">
+                    Links the Dots
+                </span>
+            </div>
+        </a>
     </div>
-
     <nav class="sidebar-nav">
         <span class="nav-section-label">Gestion globale</span>
 

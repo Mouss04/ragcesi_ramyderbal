@@ -282,10 +282,7 @@
             <div class="doc-hero-stat-num">{{ $documents->count() }}</div>
             <div class="doc-hero-stat-label">Documents</div>
         </div>
-        <div class="doc-hero-stat">
-            <div class="doc-hero-stat-num">{{ $documents->where('file_path', 'like', '%.pdf')->count() }}</div>
-            <div class="doc-hero-stat-label">PDF</div>
-        </div>
+        
     </div>
 </div>
 

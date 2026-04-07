@@ -240,10 +240,7 @@
     </div>
 
     {{-- Watermark --}}
-    <div style="margin-top:2.5rem;display:flex;justify-content:flex-start;">
-        <img src="{{ asset('bagroung_logo.png') }}" alt="" aria-hidden="true"
-             style="width:550px;height:auto;opacity:0.13;pointer-events:none;user-select:none;display:block;">
-    </div>
+  
 
 @push('scripts')
 <script>
