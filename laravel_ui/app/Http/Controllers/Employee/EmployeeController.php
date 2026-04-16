@@ -48,12 +48,43 @@ class EmployeeController extends Controller
         $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
         if (! in_array($ext, ['txt', 'md'])) {
-            return response()->json(['error' => 'Aperçu non disponible pour les fichiers PDF. Téléchargez le document pour le consulter.']);
+            return response()->json(['error' => 'Format non pris en charge pour l\'aperçu texte.']);
         }
 
         $content = File::get($filePath);
 
         return response()->json(['content' => $content]);
+    }
+
+    public function documentView(int $id): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        $document = Document::query()->findOrFail($id);
+
+        $projectRoot = dirname(base_path());
+        $filePath = $projectRoot.'/'.$document->file_path;
+
+        if (! File::exists($filePath)) {
+            abort(404, 'Fichier introuvable sur le serveur.');
+        }
+
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'pdf'  => 'application/pdf',
+            'txt'  => 'text/plain',
+            'md'   => 'text/plain',
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'gif'  => 'image/gif',
+            'webp' => 'image/webp',
+            'svg'  => 'image/svg+xml',
+        ];
+        $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+        return response()->file($filePath, [
+            'Content-Type'        => $mime,
+            'Content-Disposition' => 'inline; filename="'.basename($filePath).'"',
+        ]);
     }
 
     public function history(): View

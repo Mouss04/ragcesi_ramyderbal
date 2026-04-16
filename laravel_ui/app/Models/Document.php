@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Document extends Model
 {
-    protected $fillable = ['title', 'file_path', 'company_id'];
+    protected $fillable = ['title', 'file_path', 'type', 'description', 'company_id'];
 
     protected static function booted(): void
     {

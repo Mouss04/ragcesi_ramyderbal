@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+        Route::get('/documents/consult', [DocumentController::class, 'consult'])->name('documents.consult');
 
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
@@ -63,6 +64,7 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:user,supervisor,admin')->prefix('employee')->name('employee.')->group(function (): void {
         Route::get('/documents', [EmployeeController::class, 'documents'])->name('documents');
         Route::get('/documents/{id}/content', [EmployeeController::class, 'documentContent'])->name('documents.content');
+        Route::get('/documents/{id}/view', [EmployeeController::class, 'documentView'])->name('documents.view');
         Route::get('/history', [EmployeeController::class, 'history'])->name('history');
         Route::delete('/history', [EmployeeController::class, 'clearHistory'])->name('history.clear');
         Route::get('/settings', [EmployeeController::class, 'settings'])->name('settings');
@@ -105,6 +107,7 @@ Route::middleware('auth')->group(function (): void {
     Route::middleware('role:user,supervisor,admin')->prefix('employee')->name('employee.')->group(function (): void {
         Route::get('/documents', [EmployeeController::class, 'documents'])->name('documents');
         Route::get('/documents/{id}/content', [EmployeeController::class, 'documentContent'])->name('documents.content');
+        Route::get('/documents/{id}/view', [EmployeeController::class, 'documentView'])->name('documents.view');
         Route::get('/history', [EmployeeController::class, 'history'])->name('history');
         Route::delete('/history', [EmployeeController::class, 'clearHistory'])->name('history.clear');
         Route::get('/settings', [EmployeeController::class, 'settings'])->name('settings');

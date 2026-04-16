@@ -23,6 +23,15 @@ class DocumentController extends Controller
         ]);
     }
 
+    public function consult(): View
+    {
+        $this->syncDataDirectoryRecords();
+
+        return view('admin.documents.consult', [
+            'documents' => Document::query()->latest()->get(),
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         @set_time_limit(300);
@@ -44,9 +53,23 @@ class DocumentController extends Controller
         $filename = now()->format('YmdHis').'_'.$this->slugFilename($data['title']).'.'.$extension;
         $file->move($targetDir, $filename);
 
+        $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $isImage = in_array($extension, $imageExts, true);
+
+        $description = null;
+        if ($isImage) {
+            try {
+                $description = $this->describeImage($projectRoot.'/'.'data/'.$filename, $projectRoot);
+            } catch (\Throwable) {
+                $description = null;
+            }
+        }
+
         Document::query()->create([
-            'title' => $data['title'],
-            'file_path' => 'data/'.$filename,
+            'title'       => $data['title'],
+            'file_path'   => 'data/'.$filename,
+            'type'        => $extension,
+            'description' => $description,
         ]);
 
         $this->syncDataDirectoryRecords();
@@ -76,6 +99,40 @@ class DocumentController extends Controller
         }
 
         return back()->with('status', $status);
+    }
+
+    private function describeImage(string $absoluteImagePath, string $projectRoot): ?string
+    {
+        $scriptPath = $projectRoot.'/describe_image.py';
+
+        if (! file_exists($scriptPath)) {
+            return null;
+        }
+
+        $pythonExecutable = file_exists($projectRoot.'/.venv/bin/python')
+            ? $projectRoot.'/.venv/bin/python'
+            : 'python3';
+
+        $env = array_merge($_ENV, [
+            'VLM_URL'   => env('VLM_URL', 'http://192.168.100.67:1234'),
+            'VLM_MODEL' => env('VLM_MODEL', 'google/gemma-4-e2b'),
+        ]);
+
+        $process = new Process([$pythonExecutable, $scriptPath, $absoluteImagePath], $projectRoot, $env);
+        $process->setTimeout(180);
+        $process->run();
+
+        $output = trim($process->getOutput());
+        if ($output === '') {
+            return null;
+        }
+
+        $decoded = json_decode($output, true);
+        if (is_array($decoded) && isset($decoded['description'])) {
+            return $decoded['description'];
+        }
+
+        return null;
     }
 
     private function slugFilename(string $value): string
@@ -136,7 +193,11 @@ class DocumentController extends Controller
 
             Document::query()->firstOrCreate(
                 ['file_path' => $relativePath],
-                ['title' => Str::headline(pathinfo($filename, PATHINFO_FILENAME)), 'company_id' => auth()->user()?->company_id]
+                [
+                    'title'      => Str::headline(pathinfo($filename, PATHINFO_FILENAME)),
+                    'type'       => $extension,
+                    'company_id' => auth()->user()?->company_id,
+                ]
             );
         }
     }

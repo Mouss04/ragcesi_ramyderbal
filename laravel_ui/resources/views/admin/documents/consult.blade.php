@@ -1,4 +1,4 @@
-@extends('layouts.employee')
+@extends('layouts.admin')
 
 @push('styles')
 <style>
@@ -218,15 +218,13 @@
     <div class="doc-hero-left">
         <div class="doc-hero-icon">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
             </svg>
         </div>
         <div>
             <div class="doc-hero-title">{{ __('Document library') }}</div>
-            <div class="doc-hero-sub">{{ __('Browse documents shared by the company') }}</div>
+            <div class="doc-hero-sub">{{ __('Browse and consult all indexed documents') }}</div>
         </div>
     </div>
     <div class="doc-count-pill">
@@ -290,7 +288,7 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                         </svg>
-                        Consulter
+                        {{ __('Consult') }}
                     </button>
                 </div>
             </div>
@@ -314,7 +312,7 @@
             </button>
         </div>
         <div class="viewer-body" id="viewer-body">
-            <div style="text-align:center;padding:2rem;color:#9bb0b0;">Chargement…</div>
+            <div style="text-align:center;padding:2rem;color:#9bb0b0;">{{ __('Loading…') }}</div>
         </div>
         <div class="viewer-footer">
             <button onclick="closeViewer()"
@@ -341,6 +339,12 @@ function openViewer(id, title, ext, description) {
     const body = document.getElementById('viewer-body');
     body.innerHTML = '';
     body.classList.remove('text-mode');
+    body.style.padding    = '';
+    body.style.alignItems = '';
+    body.style.justifyContent = '';
+    body.style.overflow   = '';
+    body.style.flexDirection = '';
+    body.style.gap        = '';
     document.getElementById('viewer-overlay').classList.add('open');
 
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
@@ -352,12 +356,12 @@ function openViewer(id, title, ext, description) {
         body.style.padding = '0';
         body.appendChild(iframe);
     } else if (imageExts.includes(ext)) {
-        body.style.padding = '1rem';
-        body.style.alignItems = 'flex-start';
+        body.style.padding       = '1rem';
+        body.style.alignItems    = 'flex-start';
         body.style.justifyContent = 'center';
-        body.style.overflow = 'auto';
+        body.style.overflow      = 'auto';
         body.style.flexDirection = 'column';
-        body.style.gap = '1rem';
+        body.style.gap           = '1rem';
 
         const img = document.createElement('img');
         img.src = '/employee/documents/' + id + '/view';
@@ -392,7 +396,7 @@ function openViewer(id, title, ext, description) {
         }
     } else {
         body.classList.add('text-mode');
-        body.innerHTML = '<div style="text-align:center;padding:2rem;color:#9bb0b0;">Chargement…</div>';
+        body.innerHTML = '<div style="text-align:center;padding:2rem;color:#9bb0b0;">{{ __("Loading…") }}</div>';
 
         fetch('/employee/documents/' + id + '/content', {
             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
@@ -406,7 +410,7 @@ function openViewer(id, title, ext, description) {
             }
         })
         .catch(() => {
-            body.innerHTML = '<span style="color:#dc2626;">Impossible de charger le document.</span>';
+            body.innerHTML = '<span style="color:#dc2626;">{{ __("Unable to load the document.") }}</span>';
         });
     }
 }

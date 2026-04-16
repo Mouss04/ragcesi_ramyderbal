@@ -419,6 +419,12 @@
                         <div class="doc-row-meta">
                             <span class="doc-row-badge">{{ strtoupper($ext) }}</span>
                             <span>{{ basename($document->file_path) }}</span>
+                            @if($document->description)
+                                <span style="background:#e6f4f4;color:#0c7070;border-radius:5px;padding:1px 6px;font-size:.68rem;font-weight:600;">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:2px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    VLM
+                                </span>
+                            @endif
                         </div>
                     </div>
                     <div class="doc-row-date">
