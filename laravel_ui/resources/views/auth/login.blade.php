@@ -320,56 +320,63 @@
     {{-- Left: form panel --}}
     <div class="login-left">
 
-        <a href="{{ url('/') }}" class="btn-home">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Retour à l'accueil
-        </a>
+    <a href="{{ url('/') }}" class="btn-home">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour à l'accueil
+    </a>
 
-        <div class="brand" style="margin-top:1.4rem;">
-            <span class="brand-name">Witrack <span style="color:#3d8c87;">Links the Dots</span></span>
+    <div class="brand" style="margin-top:1.4rem;">
+        <span class="brand-name">Witrack <span style="color:#3d8c87;">Relie les points</span></span>
+    </div>
+
+    <h1 class="welcome-title">Connexion à votre compte</h1>
+    <p class="welcome-sub">Connectez-vous pour accéder à votre portail de connaissances.</p>
+
+    @if (session('status'))
+        <div class="alert-status">{{ session('status') }}</div>
+    @endif
+    @if ($errors->any())
+        <div class="alert-error">{{ $errors->first() }}</div>
+    @endif
+
+    <form method="POST" action="{{ route('login.attempt') }}">
+        @csrf
+
+        <div class="field">
+            <label class="field-label" for="name">Nom d'utilisateur</label>
+            <div class="field-wrap">
+                <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <input id="name" name="name" value="{{ old('name') }}" autocomplete="username" required autofocus placeholder="votre.nom">
+            </div>
         </div>
 
-        <h1 class="welcome-title">Login to your account</h1>
-        <p class="welcome-sub">Sign in to access your knowledge portal.</p>
-
-        @if (session('status'))
-            <div class="alert-status">{{ session('status') }}</div>
-        @endif
-        @if ($errors->any())
-            <div class="alert-error">{{ $errors->first() }}</div>
-        @endif
-
-        <form method="POST" action="{{ route('login.attempt') }}">
-            @csrf
-
-            <div class="field">
-                <label class="field-label" for="name">Username</label>
-                <div class="field-wrap">
-                    <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <input id="name" name="name" value="{{ old('name') }}" autocomplete="username" required autofocus placeholder="your.username">
-                </div>
+        <div class="field">
+            <label class="field-label" for="password">Mot de passe</label>
+            <div class="field-wrap">
+                <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
             </div>
+        </div>
 
-            <div class="field">
-                <label class="field-label" for="password">Password</label>
-                <div class="field-wrap">
-                    <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                    <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="••••••••">
-                </div>
-            </div>
+        <button type="submit" class="btn-login">
+            Se connecter
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+        </button>
+    </form>
 
-            <button type="submit" class="btn-login">
-                Log In
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </button>
-        </form>
+</div>
 
-    </div>
+
 
     {{-- Right: brand / feature panel --}}
    <div class="login-right">

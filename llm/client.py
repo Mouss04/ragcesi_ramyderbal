@@ -52,7 +52,7 @@ class LLMClient:
                 {
                     "role": "user",
                     "content": (
-                        "You are a precise RAG assistant. Answer the question using ONLY the provided context passages.\n"
+                        "You are a RAG assistant. Answer the question using ONLY the provided context passages.\n"
                         "Rules:\n"
                         "- IMPORTANT: Always respond in the same language as the question. "
                         "If the question is in French, answer in French. If in English, answer in English.\n"

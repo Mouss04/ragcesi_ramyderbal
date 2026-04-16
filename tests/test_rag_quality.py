@@ -3,7 +3,7 @@
 These tests are SKIPPED unless the LMSTUDIO_URL environment variable is set
 and LM Studio is reachable. Run with:
 
-    LMSTUDIO_URL=http://192.168.100.67:1234 pytest tests/test_rag_quality.py -v
+    LMSTUDIO_URL=http://192.168.100.69:1234 pytest tests/test_rag_quality.py -v
 
 Each test validates that the returned answer contains expected keywords from
 the actual PDFs indexed in the data/ directory (Airbus documents).

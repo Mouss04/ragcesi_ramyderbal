@@ -219,7 +219,7 @@
     <div class="page-header">
         <div>
             <div class="page-header-title">{{ __('User management') }}</div>
-            <div class="page-header-sub">{{ __('Create, edit and delete employee and administrator accounts.') }}</div>
+            <div class="page-header-sub">{{ __('Create, edit and delete employee and Supervisor accounts.') }}</div>
         </div>
         <button type="button" class="btn btn-primary" onclick="openCreateModal()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -285,10 +285,10 @@
                     <div class="user-card-name">{{ $user->name }}</div>
                     <div class="user-card-id">#{{ $user->id }}</div>
                     @if($isAdmin)
-                        <span class="user-card-badge badge-admin">
+                      {{--   <span class="user-card-badge badge-admin">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             {{ __('Administrator') }}
-                        </span>
+                        </span>--}}
                     @elseif($isSupervisor)
                         <span class="user-card-badge badge-supervisor">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
@@ -371,9 +371,9 @@
                     <select id="create-role" name="role" required>
                         <option value="user" {{ old('role','user') === 'user' ? 'selected' : '' }}>{{ __('Employee') }}</option>
                         <option value="supervisor" {{ old('role') === 'supervisor' ? 'selected' : '' }}>{{ __('Supervisor') }}</option>
-                        @if(auth()->user()->role === 'admin')
+                      {{--  @if(auth()->user()->role === 'admin')
                         <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>{{ __('Administrator') }}</option>
-                        @endif
+                        @endif--}}
                     </select>
                 </div>
                 <div class="edit-field">
@@ -436,9 +436,9 @@
                     <select id="modal-role" name="role" required>
                         <option value="user">{{ __('Employee') }}</option>
                         <option value="supervisor">{{ __('Supervisor') }}</option>
-                        @if(auth()->user()->role === 'admin')
+                       {{-- @if(auth()->user()->role === 'admin')
                         <option value="admin">{{ __('Administrator') }}</option>
-                        @endif
+                        @endif--}}
                     </select>
                 </div>
                 <div class="edit-field">

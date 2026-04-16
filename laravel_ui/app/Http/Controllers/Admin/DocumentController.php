@@ -29,7 +29,7 @@ class DocumentController extends Controller
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'file' => ['required', 'file', 'mimes:pdf,txt,md', 'max:51200'],
+            'file' => ['required', 'file', 'mimes:pdf,txt,md,jpg,jpeg,png,gif,webp', 'max:51200'],
         ]);
 
         $projectRoot = dirname(base_path());
@@ -40,7 +40,7 @@ class DocumentController extends Controller
         }
 
         $file = $data['file'];
-        $extension = Str::lower($file->getClientOriginalExtension() ?: 'pdf');
+        $extension = Str::lower($file->getClientOriginalExtension() ?: 'bin');
         $filename = now()->format('YmdHis').'_'.$this->slugFilename($data['title']).'.'.$extension;
         $file->move($targetDir, $filename);
 
@@ -96,8 +96,13 @@ class DocumentController extends Controller
             ? $projectRoot.'/.venv/bin/python'
             : 'python3';
 
-        $process = new Process([$pythonExecutable, $scriptPath], $projectRoot);
-        $process->setTimeout(240);
+        $env = array_merge($_ENV, [
+            'VLM_URL'   => env('VLM_URL', 'http://192.168.100.67:1234'),
+            'VLM_MODEL' => env('VLM_MODEL', 'google/gemma-4-e2b'),
+        ]);
+
+        $process = new Process([$pythonExecutable, $scriptPath], $projectRoot, $env);
+        $process->setTimeout(300);
         $process->mustRun();
 
         return trim($process->getOutput());
@@ -112,7 +117,7 @@ class DocumentController extends Controller
             return;
         }
 
-        $allowedExtensions = ['pdf', 'txt', 'md'];
+        $allowedExtensions = ['pdf', 'txt', 'md', 'jpg', 'jpeg', 'png', 'gif', 'webp'];
         $ignoredFilenames = ['faiss.index', 'faiss.meta.json'];
 
         foreach (File::allFiles($dataDir) as $file) {

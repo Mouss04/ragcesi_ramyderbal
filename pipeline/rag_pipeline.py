@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from ingestion.loader import DocumentIngestor
 from preprocessing.cleaner import TextPreprocessor
@@ -12,8 +13,14 @@ from llm.client import LLMClient
 class RAGPipeline:
     """Connect all RAG modules end-to-end."""
 
-    def __init__(self, lmstudio_url: str, model_name: str = "mistral") -> None:
-        self.ingestor = DocumentIngestor()
+    def __init__(
+        self,
+        lmstudio_url: str,
+        model_name: str = "mistral",
+        vlm_url: Optional[str] = None,
+        vlm_model: Optional[str] = None,
+    ) -> None:
+        self.ingestor = DocumentIngestor(vlm_url=vlm_url, vlm_model=vlm_model)
         self.preprocessor = TextPreprocessor()
         self.chunker = TextChunker()
         self.embedder = EmbeddingGenerator()

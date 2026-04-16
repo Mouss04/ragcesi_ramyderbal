@@ -227,6 +227,7 @@
 .doc-row-icon.pdf  { background:#fff1f0; color:#ef4444; }
 .doc-row-icon.txt  { background:#f0f9ff; color:#0284c7; }
 .doc-row-icon.md   { background:#faf5ff; color:#7c3aed; }
+.doc-row-icon.img  { background:#fff7ed; color:#ea580c; }
 .doc-row-info { flex:1; min-width:0; }
 .doc-row-title {
     font-size:.88rem; font-weight:700; color:#1e2c2c;
@@ -330,9 +331,9 @@
                 </div>
 
                 <div class="doc-field">
-                    <label>{{ __('File') }} <span style="color:#9bb0b0;font-weight:500;">(PDF, TXT, MD · max 50 Mo)</span></label>
+                    <label>{{ __('File') }} <span style="color:#9bb0b0;font-weight:500;">(PDF, TXT, MD, JPG, PNG, GIF, WEBP · max 50 Mo)</span></label>
                     <div class="doc-dropzone" id="drop-zone">
-                        <input type="file" id="file" name="file" accept="application/pdf,text/plain,.md" required
+                        <input type="file" id="file" name="file" accept="application/pdf,text/plain,.md,image/jpeg,image/png,image/gif,image/webp" required
                                onchange="onFileSelect(this)">
                         <div class="doc-dropzone-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -398,7 +399,8 @@
             @forelse($documents as $document)
                 @php
                     $ext = strtolower(pathinfo($document->file_path, PATHINFO_EXTENSION));
-                    $iconClass = in_array($ext, ['pdf','txt','md']) ? $ext : 'pdf';
+                    $imageExts = ['jpg','jpeg','png','gif','webp'];
+                    $iconClass = in_array($ext, ['pdf','txt','md']) ? $ext : (in_array($ext, $imageExts) ? 'img' : 'pdf');
                 @endphp
                 <div class="doc-row" data-title="{{ strtolower($document->title) }}">
                     <div class="doc-row-icon {{ $iconClass }}">
@@ -406,6 +408,8 @@
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         @elseif($ext === 'md')
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+                        @elseif(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                         @else
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         @endif
