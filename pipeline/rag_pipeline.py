@@ -19,8 +19,15 @@ class RAGPipeline:
         model_name: str = "mistral",
         vlm_url: Optional[str] = None,
         vlm_model: Optional[str] = None,
+        company_id: Optional[str] = None,
     ) -> None:
-        self.ingestor = DocumentIngestor(vlm_url=vlm_url, vlm_model=vlm_model)
+        # Per-company data directory keeps each tenant's documents isolated.
+        if company_id:
+            data_dir = os.path.join("data", f"company_{company_id}")
+        else:
+            data_dir = "data"
+
+        self.ingestor = DocumentIngestor(data_dir=data_dir, vlm_url=vlm_url, vlm_model=vlm_model)
         self.preprocessor = TextPreprocessor()
         self.chunker = TextChunker()
         self.embedder = EmbeddingGenerator()
@@ -28,9 +35,9 @@ class RAGPipeline:
         self.retriever = Retriever(self.vector_store)
         self.llm_client = LLMClient(base_url=lmstudio_url, model=model_name)
 
-        # Allow local persistence between runs.
-        self.index_path = os.path.join("data", "faiss.index")
-        self.meta_path = os.path.join("data", "faiss.meta.json")
+        # Per-company FAISS index so queries never cross tenant boundaries.
+        self.index_path = os.path.join(data_dir, "faiss.index")
+        self.meta_path = os.path.join(data_dir, "faiss.meta.json")
 
     def build(self) -> dict[str, int]:
         """Load, clean, chunk and index documents and return indexing stats."""

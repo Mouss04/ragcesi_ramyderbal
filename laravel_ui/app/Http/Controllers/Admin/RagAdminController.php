@@ -35,7 +35,9 @@ class RagAdminController extends Controller
             ? $projectRoot . '/.venv/bin/python'
             : 'python3';
 
-        $process = new Process([$python, $scriptPath, trim($validated['question'])], $projectRoot);
+        $companyId = (string) $request->user()->company_id;
+
+        $process = new Process([$python, $scriptPath, trim($validated['question']), $companyId], $projectRoot);
         $process->setTimeout(180);
 
         try {

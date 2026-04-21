@@ -42,6 +42,12 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
         Route::get('/documents/consult', [DocumentController::class, 'consult'])->name('documents.consult');
 
+        // Admin-only document management
+        Route::middleware('role:admin')->group(function (): void {
+            Route::delete('/documents', [DocumentController::class, 'destroyAll'])->name('documents.destroyAll');
+            Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        });
+
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::post('/settings/profile',  [SettingsController::class, 'updateProfile'])->name('settings.profile');
         Route::post('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');

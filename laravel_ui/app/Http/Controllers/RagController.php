@@ -39,11 +39,13 @@ class RagController extends Controller
             : 'python3';
 
         $question = trim($validated['question']);
+        $companyId = (string) $request->user()->company_id;
 
         $process = new Process([
             $pythonExecutable,
             $scriptPath,
             $question,
+            $companyId,
         ], $projectRoot);
 
         $process->setTimeout(180);

@@ -19,7 +19,7 @@ class DocumentController extends Controller
         $this->syncDataDirectoryRecords();
 
         return view('admin.documents.index', [
-            'documents' => Document::query()->latest()->get(),
+            'documents' => Document::query()->latest()->get(),  // CompanyScope auto-filters by company
         ]);
     }
 
@@ -41,8 +41,10 @@ class DocumentController extends Controller
             'file' => ['required', 'file', 'mimes:pdf,txt,md,jpg,jpeg,png,gif,webp', 'max:51200'],
         ]);
 
+        $companyId = (string) $request->user()->company_id;
         $projectRoot = dirname(base_path());
-        $targetDir = $projectRoot.'/data';
+        $companyDir = 'data/company_'.$companyId;
+        $targetDir = $projectRoot.'/'.$companyDir;
 
         if (! is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
@@ -59,7 +61,7 @@ class DocumentController extends Controller
         $description = null;
         if ($isImage) {
             try {
-                $description = $this->describeImage($projectRoot.'/'.'data/'.$filename, $projectRoot);
+                $description = $this->describeImage($targetDir.'/'.$filename, $projectRoot);
             } catch (\Throwable) {
                 $description = null;
             }
@@ -67,15 +69,16 @@ class DocumentController extends Controller
 
         Document::query()->create([
             'title'       => $data['title'],
-            'file_path'   => 'data/'.$filename,
+            'file_path'   => $companyDir.'/'.$filename,
             'type'        => $extension,
             'description' => $description,
+            'company_id'  => $companyId,
         ]);
 
-        $this->syncDataDirectoryRecords();
+        $this->syncDataDirectoryRecords($companyId);
 
         try {
-            $summary = $this->runReindex();
+            $summary = $this->runReindex($companyId);
         } catch (ProcessFailedException $exception) {
             $errorOutput = trim($exception->getProcess()->getErrorOutput());
             $fallbackOutput = trim($exception->getProcess()->getOutput());
@@ -99,6 +102,78 @@ class DocumentController extends Controller
         }
 
         return back()->with('status', $status);
+    }
+
+    public function destroy(Request $request, Document $document): RedirectResponse
+    {
+        @set_time_limit(300);
+
+        $companyId = (string) $request->user()->company_id;
+
+        // Safety check: document must belong to this company (CompanyScope covers queries,
+        // but route model binding bypasses it, so we enforce it explicitly here).
+        if ((string) $document->company_id !== $companyId) {
+            abort(403);
+        }
+
+        // Delete the physical file.
+        $projectRoot = dirname(base_path());
+        $absolutePath = $projectRoot . '/' . $document->file_path;
+        if (file_exists($absolutePath)) {
+            unlink($absolutePath);
+        }
+
+        // Delete the DB record.
+        $document->delete();
+
+        // Rebuild the FAISS index for this company from the remaining files.
+        // FAISS does not support removing individual vectors, so a full rebuild is required.
+        $remainingDocs = Document::query()->where('company_id', $companyId)->count();
+        if ($remainingDocs > 0) {
+            try {
+                $this->runReindex($companyId);
+            } catch (ProcessFailedException $exception) {
+                return redirect()->route('admin.documents.index')->withErrors([
+                    'process' => 'Document deleted but re-indexing failed: '
+                        . (trim($exception->getProcess()->getErrorOutput()) ?: trim($exception->getProcess()->getOutput())),
+                ]);
+            } catch (\RuntimeException $exception) {
+                return redirect()->route('admin.documents.index')->withErrors([
+                    'process' => 'Document deleted but re-indexing failed: ' . $exception->getMessage(),
+                ]);
+            }
+        } else {
+            // No documents left — remove the stale index files so queries return "no documents" cleanly.
+            $companyDir = $projectRoot . '/data/company_' . $companyId;
+            foreach (['faiss.index', 'faiss.meta.json'] as $indexFile) {
+                $path = $companyDir . '/' . $indexFile;
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+            }
+        }
+
+        return redirect()->route('admin.documents.index')
+            ->with('status', 'Document deleted and vector index updated.');
+    }
+
+    public function destroyAll(Request $request): RedirectResponse
+    {
+        $companyId = (string) $request->user()->company_id;
+
+        // Delete all DB records (CompanyScope ensures only this company's rows are touched).
+        Document::query()->delete();
+
+        // Delete the company's data directory (files + FAISS index).
+        $projectRoot = dirname(base_path());
+        $companyDir  = $projectRoot . '/data/company_' . $companyId;
+
+        if (is_dir($companyDir)) {
+            File::deleteDirectory($companyDir);
+        }
+
+        return redirect()->route('admin.documents.index')
+            ->with('status', 'All documents and vector index have been deleted.');
     }
 
     private function describeImage(string $absoluteImagePath, string $projectRoot): ?string
@@ -140,7 +215,7 @@ class DocumentController extends Controller
         return Str::slug($value).'_'.Str::lower(Str::random(6));
     }
 
-    private function runReindex(): string
+    private function runReindex(string $companyId): string
     {
         $projectRoot = dirname(base_path());
         $scriptPath = $projectRoot.'/reindex.py';
@@ -154,21 +229,28 @@ class DocumentController extends Controller
             : 'python3';
 
         $env = array_merge($_ENV, [
-            'VLM_URL'   => env('VLM_URL', 'http://192.168.100.67:1234'),
-            'VLM_MODEL' => env('VLM_MODEL', 'google/gemma-4-e2b'),
+            'LMSTUDIO_URL'   => env('LMSTUDIO_URL', 'http://192.168.100.67:1234'),
+            'LMSTUDIO_MODEL' => env('LMSTUDIO_MODEL', 'mistral-7b-instruct-v0.3'),
+            'VLM_URL'        => env('VLM_URL', 'http://192.168.100.67:1234'),
+            'VLM_MODEL'      => env('VLM_MODEL', 'google/gemma-4-e2b'),
         ]);
 
-        $process = new Process([$pythonExecutable, $scriptPath], $projectRoot, $env);
+        $process = new Process([$pythonExecutable, $scriptPath, $companyId], $projectRoot, $env);
         $process->setTimeout(300);
         $process->mustRun();
 
         return trim($process->getOutput());
     }
 
-    private function syncDataDirectoryRecords(): void
+    private function syncDataDirectoryRecords(string $companyId = null): void
     {
+        $companyId = $companyId ?? (string) \Illuminate\Support\Facades\Auth::user()?->company_id;
+        if (! $companyId) {
+            return;
+        }
+
         $projectRoot = dirname(base_path());
-        $dataDir = $projectRoot.'/data';
+        $dataDir = $projectRoot.'/data/company_'.$companyId;
 
         if (! is_dir($dataDir)) {
             return;
@@ -196,7 +278,7 @@ class DocumentController extends Controller
                 [
                     'title'      => Str::headline(pathinfo($filename, PATHINFO_FILENAME)),
                     'type'       => $extension,
-                    'company_id' => auth()->user()?->company_id,
+                    'company_id' => $companyId,
                 ]
             );
         }

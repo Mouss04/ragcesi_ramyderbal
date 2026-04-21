@@ -257,6 +257,63 @@
 }
 .doc-empty-title { font-size:.95rem; font-weight:700; color:#4a6666; }
 .doc-empty-sub   { font-size:.8rem; max-width:260px; line-height:1.5; }
+
+/* ── Danger button ── */
+.doc-danger-btn {
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.4rem .85rem; border-radius:9px;
+    background:#fff1f2; border:1.5px solid #fca5a5;
+    color:#dc2626; font:.8rem/1 inherit; font-weight:700;
+    cursor:pointer; transition:background 120ms, border-color 120ms;
+    white-space:nowrap;
+}
+.doc-danger-btn:hover { background:#fee2e2; border-color:#f87171; }
+
+/* ── Per-row delete button ── */
+.doc-row-delete-btn {
+    flex-shrink:0; width:30px; height:30px; border-radius:8px;
+    background:transparent; border:1.5px solid transparent;
+    color:#c0c8c8; cursor:pointer; display:grid; place-items:center;
+    transition:background 120ms, border-color 120ms, color 120ms;
+    opacity:0;
+}
+.doc-row:hover .doc-row-delete-btn { opacity:1; }
+.doc-row-delete-btn:hover { background:#fff1f2; border-color:#fca5a5; color:#dc2626; }
+
+/* ── Confirm modal ── */
+.confirm-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.45); z-index:900;
+    align-items:center; justify-content:center;
+}
+.confirm-overlay.open { display:flex; }
+.confirm-modal {
+    background:#fff; border-radius:18px; padding:2rem 2rem 1.6rem;
+    max-width:400px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.2);
+    text-align:center;
+}
+.confirm-modal-icon {
+    width:56px; height:56px; border-radius:16px;
+    background:#fff1f2; display:grid; place-items:center;
+    margin:0 auto .9rem; color:#dc2626;
+}
+.confirm-modal-title { font-size:1.05rem; font-weight:800; color:#1e2c2c; margin-bottom:.5rem; }
+.confirm-modal-sub   { font-size:.84rem; color:#6a8a8a; line-height:1.55; margin-bottom:1.4rem; }
+.confirm-modal-actions { display:flex; gap:.7rem; justify-content:center; }
+.confirm-cancel-btn {
+    flex:1; padding:.65rem; border-radius:11px;
+    border:1.5px solid #d0e2e2; background:#fff;
+    font:.88rem/1 inherit; font-weight:600; color:#4a7070;
+    cursor:pointer; transition:background 120ms;
+}
+.confirm-cancel-btn:hover { background:#f4fafa; }
+.confirm-confirm-btn {
+    flex:1; padding:.65rem; border-radius:11px;
+    border:none; background:#dc2626;
+    font:.88rem/1 inherit; font-weight:700; color:#fff;
+    cursor:pointer; transition:opacity 120ms;
+}
+.confirm-confirm-btn:hover { opacity:.88; }
 </style>
 @endpush
 
@@ -393,6 +450,12 @@
             <input type="text" class="doc-search" id="doc-search"
                    placeholder="{{ __('Search a document…') }}" oninput="filterDocs(this.value)">
             <div class="doc-count" id="doc-count">{{ $documents->count() }} {{ __('result(s)') }}</div>
+            @if(auth()->user()->isAdmin() && $documents->count() > 0)
+            <button class="doc-danger-btn" onclick="openConfirm()" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                {{ __('Clear all') }}
+            </button>
+            @endif
         </div>
 
         <div class="doc-list" id="doc-list">
@@ -431,6 +494,14 @@
                         {{ $document->created_at?->format('d/m/Y') }}<br>
                         <span style="color:#b8c8c8;">{{ $document->created_at?->format('H:i') }}</span>
                     </div>
+                    @if(auth()->user()->isAdmin())
+                    <button class="doc-row-delete-btn"
+                            onclick="openDocConfirm({{ $document->id }}, '{{ addslashes($document->title) }}')"
+                            type="button"
+                            title="{{ __('Delete') }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                    @endif
                 </div>
             @empty
                 <div class="doc-empty">
@@ -445,6 +516,49 @@
     </div>
 
 </div>
+
+{{-- ── Confirm clear-all modal ── --}}
+@if(auth()->user()->isAdmin())
+<div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-modal">
+        <div class="confirm-modal-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="confirm-modal-title">{{ __('Delete all documents?') }}</div>
+        <div class="confirm-modal-sub">{{ __('This will permanently delete all indexed documents and the vector index for your company. This action cannot be undone.') }}</div>
+        <div class="confirm-modal-actions">
+            <button class="confirm-cancel-btn" onclick="closeConfirm()" type="button">{{ __('Cancel') }}</button>
+            <form method="POST" action="{{ route('admin.documents.destroyAll') }}" style="flex:1">
+                @csrf
+                @method('DELETE')
+                <button class="confirm-confirm-btn" type="submit" style="width:100%">{{ __('Delete all') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- Per-document confirm modal --}}
+<div class="confirm-overlay" id="doc-confirm-overlay">
+    <div class="confirm-modal">
+        <div class="confirm-modal-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+        <div class="confirm-modal-title">{{ __('Delete this document?') }}</div>
+        <div class="confirm-modal-sub">
+            « <span id="doc-confirm-name"></span> »<br>
+            {{ __('The file and its vectors will be permanently removed and the index rebuilt.') }}
+        </div>
+        <div class="confirm-modal-actions">
+            <button class="confirm-cancel-btn" onclick="closeDocConfirm()" type="button">{{ __('Cancel') }}</button>
+            <form id="doc-confirm-form" method="POST" action="" style="flex:1">
+                @csrf
+                @method('DELETE')
+                <button class="confirm-confirm-btn" type="submit" style="width:100%">{{ __('Delete') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 
 @push('scripts')
 <script>
@@ -527,6 +641,31 @@ function filterDocs(q) {
     });
     if (countEl) countEl.textContent = visible + ' {{ __('result(s)') }}';
 }
+
+/* ── Confirm clear-all modal ── */
+function openConfirm() {
+    document.getElementById('confirm-overlay')?.classList.add('open');
+}
+function closeConfirm() {
+    document.getElementById('confirm-overlay')?.classList.remove('open');
+}
+document.getElementById('confirm-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+});
+
+/* ── Per-document confirm modal ── */
+function openDocConfirm(id, title) {
+    const baseUrl = '{{ url('admin/documents') }}';
+    document.getElementById('doc-confirm-name').textContent = title;
+    document.getElementById('doc-confirm-form').action = baseUrl + '/' + id;
+    document.getElementById('doc-confirm-overlay')?.classList.add('open');
+}
+function closeDocConfirm() {
+    document.getElementById('doc-confirm-overlay')?.classList.remove('open');
+}
+document.getElementById('doc-confirm-overlay')?.addEventListener('click', function(e) {
+    if (e.target === this) closeDocConfirm();
+});
 </script>
 @endpush
 
