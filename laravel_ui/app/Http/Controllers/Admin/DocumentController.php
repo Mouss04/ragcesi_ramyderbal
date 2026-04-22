@@ -265,6 +265,11 @@ class DocumentController extends Controller
                 continue;
             }
 
+            // Skip comment files written by CommentController for RAG indexing
+            if (str_starts_with($filename, 'comment_')) {
+                continue;
+            }
+
             $extension = Str::lower($file->getExtension());
             if (! in_array($extension, $allowedExtensions, true)) {
                 continue;

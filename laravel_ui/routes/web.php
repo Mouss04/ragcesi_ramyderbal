@@ -5,8 +5,10 @@ use App\Http\Controllers\Admin\RagAdminController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Employee\EmployeeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RagController;
 use App\Http\Controllers\Witrack\WitrackController;
 use Illuminate\Support\Facades\Route;
@@ -21,6 +23,11 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ── Notifications ──────────────────────────────────────────────────────────
+
+    Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.markAllRead');
+    Route::get('/notifications/unread-count',   [NotificationController::class, 'unreadCount'])->name('notifications.unreadCount');
 
     // ── Witrack Agent ──────────────────────────────────────────────────────────
     Route::middleware('role:witrack_agent')->prefix('witrack')->name('witrack.')->group(function (): void {
@@ -59,6 +66,11 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/rag',  [RagAdminController::class, 'index'])->name('rag');
         Route::post('/rag', [RagAdminController::class, 'ask'])->name('rag.ask');
+
+        // Comments – history & moderation
+        Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
+        Route::patch('/comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve');
+        Route::patch('/comments/{comment}/reject',  [CommentController::class, 'reject'])->name('comments.reject');
     });
 
     // ── Employees / Supervisors / Admins ───────────────────────────────────────
@@ -71,6 +83,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/documents', [EmployeeController::class, 'documents'])->name('documents');
         Route::get('/documents/{id}/content', [EmployeeController::class, 'documentContent'])->name('documents.content');
         Route::get('/documents/{id}/view', [EmployeeController::class, 'documentView'])->name('documents.view');
+        Route::post('/documents/{id}/comments', [CommentController::class, 'store'])->name('documents.comments.store');
         Route::get('/history', [EmployeeController::class, 'history'])->name('history');
         Route::delete('/history', [EmployeeController::class, 'clearHistory'])->name('history.clear');
         Route::get('/settings', [EmployeeController::class, 'settings'])->name('settings');

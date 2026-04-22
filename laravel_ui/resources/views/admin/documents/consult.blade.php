@@ -116,6 +116,83 @@
     color: var(--teal);
 }
 
+/* ── Action dropdown ── */
+.doc-actions-group {
+    display: flex;
+    align-items: stretch;
+    position: relative;
+}
+.doc-view-btn-main {
+    border-radius: 8px;
+}
+.doc-actions-toggle {
+    border-radius: 0 8px 8px 0;
+    border-left: 1px solid var(--line);
+    padding: 0.45rem 0.65rem;
+}
+.doc-actions-menu {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.1);
+    z-index: 200;
+    min-width: 190px;
+    overflow: hidden;
+}
+.doc-actions-menu.open { display: block; }
+.doc-actions-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: 120ms;
+}
+.doc-actions-menu button:hover {
+    background: var(--teal-soft);
+    color: var(--teal);
+}
+
+/* ── Comment modal textarea ── */
+.comment-textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #1e2c2c;
+    resize: vertical;
+    outline: none;
+    transition: border-color 140ms;
+}
+.comment-textarea:focus { border-color: var(--teal); }
+
+/* ── Status badge ── */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
 /* ── Search ── */
 .search-bar {
     display: flex;
@@ -284,12 +361,15 @@
                     </div>
                 </div>
                 <div class="doc-card-footer">
-                    <button onclick="openViewer({{ $doc->id }}, {{ Js::from($doc->title) }}, {{ Js::from(strtolower($ext)) }}, {{ Js::from($doc->description) }})" class="doc-view-btn">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        {{ __('Consult') }}
-                    </button>
+                    <div class="doc-actions-group">
+                        <button onclick="openViewer({{ $doc->id }}, {{ Js::from($doc->title) }}, {{ Js::from(strtolower($ext)) }}, {{ Js::from($doc->description) }})" class="doc-view-btn doc-view-btn-main">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            {{ __('Consult') }}
+                        </button>
+
+                    </div>
                 </div>
             </div>
         @endforeach
@@ -314,10 +394,58 @@
         <div class="viewer-body" id="viewer-body">
             <div style="text-align:center;padding:2rem;color:#9bb0b0;">{{ __('Loading…') }}</div>
         </div>
-        <div class="viewer-footer">
+        <div class="viewer-footer" style="display:flex;justify-content:space-between;align-items:center;">
+            <button onclick="openCommentModal(currentViewerDocId, currentViewerDocTitle)"
+                style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem 1.2rem;border-radius:9px;border:none;background:var(--teal);color:#fff;font:inherit;font-size:0.84rem;font-weight:700;cursor:pointer;transition:140ms;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {{ __('Add a comment') }}
+            </button>
             <button onclick="closeViewer()"
                 style="padding:0.5rem 1.2rem;border-radius:9px;border:1.5px solid #dde8e8;background:#fff;font:inherit;font-size:0.84rem;font-weight:600;cursor:pointer;">
                 {{ __('Close') }}
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Comment modal --}}
+<div class="viewer-overlay" id="comment-overlay" onclick="closeCommentOutside(event)">
+    <div class="viewer-modal" style="max-width:540px;height:auto;max-height:90vh;">
+        <div class="viewer-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--teal);flex-shrink:0;">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <div class="viewer-title" id="comment-doc-title">{{ __('Add a comment') }}</div>
+            <button class="viewer-close" onclick="closeCommentModal()" title="{{ __('Close') }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div style="padding:1.5rem;overflow-y:auto;">
+            <p style="font-size:0.83rem;color:#9bb0b0;margin-bottom:1rem;">{{ __('Add a comment about this document. It will be reviewed before being published.') }}</p>
+            <textarea id="comment-content" class="comment-textarea" placeholder="{{ __('Your comment…') }}"></textarea>
+            <div id="comment-feedback" style="display:none;margin-top:0.75rem;padding:0.7rem 1rem;border-radius:8px;font-size:0.84rem;font-weight:600;"></div>
+
+            {{-- Submission loading bar --}}
+            <div id="comment-loading" style="display:none;margin-top:1rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                    <span style="font-size:.74rem;font-weight:700;color:#0c7070;">{{ __('Sending…') }}</span>
+                    <span id="comment-loading-pct" style="font-size:.72rem;font-weight:700;color:#5da8a4;">0%</span>
+                </div>
+                <div style="height:5px;border-radius:99px;background:#dceeed;overflow:hidden;">
+                    <div id="comment-loading-bar" style="height:100%;width:0;background:linear-gradient(90deg,#0c7070,#3db8a4);border-radius:99px;transition:width .3s ease;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="viewer-footer" style="display:flex;justify-content:space-between;align-items:center;">
+            <button onclick="closeCommentModal()"
+                style="padding:0.5rem 1.2rem;border-radius:9px;border:1.5px solid #dde8e8;background:#fff;font:inherit;font-size:0.84rem;font-weight:600;cursor:pointer;">
+                {{ __('Cancel') }}
+            </button>
+            <button id="comment-submit-btn" onclick="submitComment()"
+                style="padding:0.5rem 1.4rem;border-radius:9px;border:none;background:var(--teal);color:#fff;font:inherit;font-size:0.84rem;font-weight:700;cursor:pointer;transition:140ms;">
+                {{ __('Submit') }}
             </button>
         </div>
     </div>
@@ -334,7 +462,12 @@ function filterDocs() {
     });
 }
 
+let currentViewerDocId = null;
+let currentViewerDocTitle = '';
+
 function openViewer(id, title, ext, description) {
+    currentViewerDocId = id;
+    currentViewerDocTitle = title;
     document.getElementById('viewer-title').textContent = title;
     const body = document.getElementById('viewer-body');
     body.innerHTML = '';
@@ -420,6 +553,168 @@ function closeViewer() {
 }
 function closeViewerOutside(e) {
     if (e.target === document.getElementById('viewer-overlay')) closeViewer();
+}
+
+/* ── Dropdown menus ── */
+function toggleDocMenu(btn, e) {
+    e.stopPropagation();
+    const menu = btn.nextElementSibling;
+    const isOpen = menu.classList.contains('open');
+    // Close all other open menus
+    document.querySelectorAll('.doc-actions-menu.open').forEach(m => m.classList.remove('open'));
+    if (!isOpen) menu.classList.add('open');
+}
+document.addEventListener('click', () => {
+    document.querySelectorAll('.doc-actions-menu.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ── Comment modal ── */
+let _commentDocId = null;
+
+function openCommentModal(docId, title) {
+    _commentDocId = docId;
+    document.getElementById('comment-doc-title').textContent = title;
+    document.getElementById('comment-content').value = '';
+    const fb = document.getElementById('comment-feedback');
+    fb.style.display = 'none';
+    fb.textContent = '';
+    document.getElementById('comment-submit-btn').disabled = false;
+    document.getElementById('comment-submit-btn').textContent = '{{ __("Submit") }}';
+    // Close any open dropdown
+    document.querySelectorAll('.doc-actions-menu.open').forEach(m => m.classList.remove('open'));
+    document.getElementById('comment-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('comment-content').focus(), 80);
+}
+
+function closeCommentModal() {
+    document.getElementById('comment-overlay').classList.remove('open');
+}
+function closeCommentOutside(e) {
+    if (e.target === document.getElementById('comment-overlay')) closeCommentModal();
+}
+
+/* ── Comment submit loading bar ── */
+let _cmBarAnim = null;
+
+function startCommentLoading() {
+    const wrap = document.getElementById('comment-loading');
+    const bar  = document.getElementById('comment-loading-bar');
+    const pct  = document.getElementById('comment-loading-pct');
+    if (!wrap) return;
+    if (_cmBarAnim) clearInterval(_cmBarAnim);
+    bar.style.transition = 'none';
+    bar.style.width = '0';
+    pct.textContent = '0%';
+    wrap.style.display = 'block';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        bar.style.transition = 'width .3s ease';
+        let p = 0;
+        _cmBarAnim = setInterval(() => {
+            p = Math.min(p + (88 - p) * 0.07, 88);
+            bar.style.width = Math.round(p) + '%';
+            pct.textContent  = Math.round(p) + '%';
+        }, 250);
+    }));
+}
+
+function finishCommentLoading() {
+    if (_cmBarAnim) { clearInterval(_cmBarAnim); _cmBarAnim = null; }
+    const bar = document.getElementById('comment-loading-bar');
+    const pct = document.getElementById('comment-loading-pct');
+    if (bar) { bar.style.width = '100%'; }
+    if (pct) { pct.textContent = '100%'; }
+    setTimeout(() => {
+        const wrap = document.getElementById('comment-loading');
+        if (wrap) wrap.style.display = 'none';
+        if (bar)  bar.style.width = '0';
+    }, 450);
+}
+
+function submitComment() {
+    const content = document.getElementById('comment-content').value.trim();
+    if (!content || content.length < 3) {
+        showCommentFeedback('error', '{{ __("Comment must be at least 3 characters.") }}');
+        return;
+    }
+
+    const btn = document.getElementById('comment-submit-btn');
+    btn.disabled = true;
+    btn.textContent = '{{ __("Sending…") }}';
+    startCommentLoading();
+
+    fetch('/employee/documents/' + _commentDocId + '/comments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ content: content }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        finishCommentLoading();
+        btn.disabled = false;
+        btn.textContent = '{{ __("Submit") }}';
+        if (data.success) {
+            /* If auto-indexed (admin/supervisor), show the header RAG indicator */
+            if (data.status === 'APPROVED') {
+                const ind = document.getElementById('rag-index-indicator');
+                const ibar = document.getElementById('rag-index-bar');
+                const ipct = document.getElementById('rag-index-pct');
+                if (ind && ibar) {
+                    let p = 0;
+                    ibar.style.transition = 'none';
+                    ibar.style.width = '0';
+                    if (ipct) ipct.textContent = '0%';
+                    ind.style.display = 'flex';
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        ibar.style.transition = 'width .35s ease';
+                        const t = setInterval(() => {
+                            p = Math.min(p + (88 - p) * 0.06, 88);
+                            ibar.style.width = Math.round(p) + '%';
+                            if (ipct) ipct.textContent = Math.round(p) + '%';
+                        }, 300);
+                        setTimeout(() => {
+                            clearInterval(t);
+                            ibar.style.width = '100%';
+                            if (ipct) ipct.textContent = '100%';
+                            setTimeout(() => {
+                                ind.style.display = 'none';
+                                ibar.style.width = '0';
+                            }, 550);
+                        }, 2500);
+                    }));
+                }
+            }
+            showCommentFeedback('success', data.message);
+            document.getElementById('comment-content').value = '';
+        } else {
+            const msg = data.errors ? Object.values(data.errors).flat().join(' ') : (data.message || '{{ __("An error occurred.") }}');
+            showCommentFeedback('error', msg);
+        }
+    })
+    .catch(() => {
+        finishCommentLoading();
+        btn.disabled = false;
+        btn.textContent = '{{ __("Submit") }}';
+        showCommentFeedback('error', '{{ __("An error occurred.") }}');
+    });
+}
+
+function showCommentFeedback(type, msg) {
+    const el = document.getElementById('comment-feedback');
+    el.style.display = 'block';
+    if (type === 'success') {
+        el.style.background = '#f0fdf4';
+        el.style.color = '#15803d';
+        el.style.border = '1px solid #bbf7d0';
+    } else {
+        el.style.background = '#fef2f2';
+        el.style.color = '#dc2626';
+        el.style.border = '1px solid #fecaca';
+    }
+    el.textContent = msg;
 }
 </script>
 @endpush
