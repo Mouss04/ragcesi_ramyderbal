@@ -1,7 +1,10 @@
+import base64
+import io
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import fitz  # pymupdf
 from pypdf import PdfReader
 
 from ingestion.image_processor import VLMImageProcessor
@@ -61,13 +64,74 @@ class DocumentIngestor:
         return ""
 
     def _read_pdf(self, path: Path) -> str:
-        """Extract text from all pages of a PDF file."""
+        """Extract text from all pages of a PDF file.
+
+        For image-based (scanned) PDFs where pypdf finds no text, each page is
+        rendered to a PNG image in memory and described by the VLM.
+        """
         try:
             reader = PdfReader(str(path))
             pages = [page.extract_text() or "" for page in reader.pages]
-            return "\n".join(pages).strip()
+            text = "\n".join(pages).strip()
+            if text:
+                return text
         except Exception:
-            # Skip malformed PDFs so ingestion can continue.
+            pass
+
+        # Fallback: render pages with pymupdf and describe each via the VLM.
+        return self._describe_pdf_as_images(path)
+
+    def _describe_pdf_as_images(self, path: Path) -> str:
+        """Render each PDF page as a PNG and run it through the VLM describer."""
+        try:
+            doc = fitz.open(str(path))
+            descriptions: list[str] = []
+            for page_num, page in enumerate(doc, start=1):
+                pix = page.get_pixmap(dpi=150)
+                png_bytes = pix.tobytes("png")
+                # Build a temporary in-memory Path-like object the VLM can encode.
+                b64 = base64.b64encode(png_bytes).decode("utf-8")
+                description = self._describe_pdf_page_b64(b64, page_num)
+                if description:
+                    descriptions.append(f"[Page {page_num}]\n{description}")
+            return "\n\n".join(descriptions).strip()
+        except Exception:
+            return ""
+
+    def _describe_pdf_page_b64(self, b64_data: str, page_num: int) -> str:
+        """Send a base64-encoded PNG page to the VLM and return the description."""
+        try:
+            import requests
+            model_name = self.vlm._resolve_model()
+            payload = {
+                "model": model_name,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/png;base64,{b64_data}",
+                                },
+                            },
+                            {
+                                "type": "text",
+                                "text": self.vlm.PROMPT,
+                            },
+                        ],
+                    }
+                ],
+                "max_tokens": 1024,
+            }
+            resp = requests.post(
+                f"{self.vlm.base_url}/v1/chat/completions",
+                json=payload,
+                timeout=120,
+            )
+            resp.raise_for_status()
+            return resp.json()["choices"][0]["message"]["content"].strip()
+        except Exception:
             return ""
 
     def _describe_image(self, path: Path) -> str:

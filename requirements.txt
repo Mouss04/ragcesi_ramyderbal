@@ -3,4 +3,5 @@ numpy>=1.26.0
 sentence-transformers>=3.0.0
 python-dotenv>=1.0.1
 pypdf>=5.1.0
+pymupdf>=1.26.0
 requests>=2.32.0

@@ -1,0 +1,59 @@
+APPLE INC ENTERPRISE DATASET (LARGE RAG TEST)
+
+====================== SECTION 1: COMPANY INFO ======================
+Apple Inc. is a multinational technology company headquartered in
+Cupertino, California. Founded: 1976 Founders: Steve Jobs, Steve
+Wozniak, Ronald Wayne
+
+====================== SECTION 2: INTERNAL EMAILS ======================
+
+[EMAIL-001] From: ops@apple.com To: supply@apple.com Subject: Delay in
+shipment
+
+We are experiencing delays in iPhone shipments due to supply chain
+issues in Asia. Please coordinate with Foxconn.
+
+------------------------------------------------------------------------
+
+[EMAIL-002] From: security@apple.com To: all@apple.com Subject: Security
+update
+
+Reminder: All employees must enable 2FA and Face ID on test devices.
+
+------------------------------------------------------------------------
+
+[EMAIL-003] From: dev@apple.com To: review@apple.com Subject: App Review
+backlog
+
+We have a backlog of 1200 apps pending review.
+
+====================== SECTION 3: SYSTEM LOGS ======================
+
+[LOG-1001] User login success - iCloud [LOG-1002] Failed Face ID attempt
+[LOG-1003] Siri request processed [LOG-1004] App Store download complete
+[LOG-1005] Device activation started [LOG-1006] Device activation
+completed
+
+====================== SECTION 4: TECH DOCS ======================
+
+Apple Silicon: - M1: First ARM chip - M2: Improved GPU - M3: 3nm
+technology
+
+Advantages: - Performance per watt - Unified memory
+
+====================== SECTION 5: FAQ ======================
+
+Q: What is iCloud? A: Cloud storage service
+
+Q: What is Siri? A: Voice assistant
+
+Q: What is Face ID? A: Biometric authentication system
+
+====================== SECTION 6: RANDOM NOTES (NOISY DATA)
+======================
+
+-   Meeting moved to Friday
+-   Test iPhone overheating issue
+-   Customer complaint about battery life
+-   Internal bug: iOS crash on launch
+
