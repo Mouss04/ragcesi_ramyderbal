@@ -595,33 +595,150 @@ if (dropZone) {
     const stepDone   = document.getElementById('step-done');
     if (!form) return;
 
-    let timerId = null;
+    const spinnerSVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>';
 
-    form.addEventListener('submit', () => {
-        button.disabled = true;
-        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Envoi en cours…';
+    const LABEL_TEXT = {
+        loading:   '{{ __('Loading documents…') }}',
+        cleaning:  '{{ __('Cleaning text…') }}',
+        chunking:  '{{ __('Chunking…') }}',
+        embedding: '{{ __('Generating embeddings…') }}',
+        saving:    '{{ __('Saving index…') }}',
+        done:      '{{ __('Done!') }}',
+    };
+
+    function setProgress(pct) {
+        bar.style.width = pct + '%';
+        label.textContent = pct + '%';
+    }
+
+    function goIndexing() {
+        stepUpload.classList.remove('active'); stepUpload.classList.add('done');
+        stepIndex.classList.remove('done');    stepIndex.classList.add('active');
+        status.textContent = '{{ __('Indexing in progress…') }}';
+    }
+
+    function goDone() {
+        stepIndex.classList.remove('active'); stepIndex.classList.add('done');
+        stepDone.classList.remove('done');    stepDone.classList.add('active');
+        setProgress(100);
+        status.textContent = '{{ __('Done!') }}';
+        setTimeout(() => stepDone.classList.add('done'), 200);
+    }
+
+    function showUploadError(msg) {
+        wrap.style.display = 'none';
+        button.disabled = false;
+        button.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.29"/></svg> {{ __('Import and index') }}';
+        let errEl = document.getElementById('ajax-upload-error');
+        if (!errEl) {
+            errEl = document.createElement('div');
+            errEl.id = 'ajax-upload-error';
+            errEl.className = 'doc-alert error';
+            errEl.style.marginTop = '.8rem';
+            form.insertBefore(errEl, form.firstChild);
+        }
+        errEl.innerHTML = '<div class="doc-alert-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div>' + msg + '</div>';
+        errEl.style.display = 'flex';
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Clear previous errors
+        const prevErr = document.getElementById('ajax-upload-error');
+        if (prevErr) prevErr.style.display = 'none';
+
+        // Reset step state
+        stepUpload.classList.add('active');
+        stepUpload.classList.remove('done');
+        stepIndex.classList.remove('active', 'done');
+        stepDone.classList.remove('active', 'done');
+        setProgress(0);
+        status.textContent = '{{ __('Uploading…') }}';
         wrap.style.display = 'block';
+        button.disabled = true;
+        button.innerHTML = spinnerSVG + ' {{ __('Uploading…') }}';
 
-        let progress = 0;
-        timerId = setInterval(() => {
-            progress = Math.min(progress + Math.max(0.5, (90 - progress) / 10), 90);
-            const r = Math.round(progress);
-            bar.style.width = r + '%';
-            label.textContent = r + '%';
+        // ── Phase 1: upload the file via XHR (real bytes progress 0→50%) ──
+        const xhr = new XMLHttpRequest();
 
-            if (r >= 30 && r < 70) {
-                stepUpload.classList.remove('active'); stepUpload.classList.add('done');
-                stepIndex.classList.add('active');
-                status.textContent = '{{ __('Indexing in progress…') }}';
-            } else if (r >= 70) {
-                stepIndex.classList.remove('active'); stepIndex.classList.add('done');
-                stepDone.classList.add('active');
-                status.textContent = '{{ __('Finalizing…') }}';
+        xhr.upload.addEventListener('progress', (ev) => {
+            if (!ev.lengthComputable) return;
+            setProgress(Math.round((ev.loaded / ev.total) * 50));
+        });
+
+        xhr.addEventListener('load', () => {
+            // Validation or server error
+            if (xhr.status === 422) {
+                let msg = '{{ __('Validation error.') }}';
+                try {
+                    const body = JSON.parse(xhr.responseText);
+                    const errs = body.errors ? Object.values(body.errors).flat() : [];
+                    if (errs.length) msg = errs.join(' ');
+                    else if (body.message) msg = body.message;
+                } catch (_) {}
+                showUploadError(msg);
+                return;
             }
-        }, 180);
-    });
+            if (xhr.status !== 200) {
+                showUploadError('{{ __('Upload failed (HTTP') }} ' + xhr.status + ').');
+                return;
+            }
 
-    window.addEventListener('beforeunload', () => { if (timerId) clearInterval(timerId); });
+            // ── Phase 2: real indexing via SSE (progress 50→100%) ──
+            setProgress(50);
+            goIndexing();
+            button.innerHTML = spinnerSVG + ' {{ __('Indexing…') }}';
+
+            let indexingDone = false;
+            const es = new EventSource('{{ route('admin.documents.reindexStream') }}');
+
+            es.onmessage = (event) => {
+                let data;
+                try { data = JSON.parse(event.data); } catch (_) { return; }
+
+                if (data.pct !== undefined) {
+                    // Pipeline reports 0–100 %; map into the 50–100 % bar range
+                    setProgress(50 + Math.round(data.pct * 0.5));
+                    if (data.label && LABEL_TEXT[data.label]) {
+                        status.textContent = LABEL_TEXT[data.label];
+                    }
+                }
+
+                if (data.done) {
+                    indexingDone = true;
+                    es.close();
+                    goDone();
+                    button.innerHTML = spinnerSVG + ' {{ __('Done!') }}';
+                    setTimeout(() => { window.location.href = '{{ route('admin.documents.index') }}'; }, 800);
+                }
+
+                if (data.error) {
+                    indexingDone = true;
+                    es.close();
+                    showUploadError('{{ __('Indexing failed:') }} ' + data.error);
+                }
+            };
+
+            es.onerror = () => {
+                es.close();
+                if (!indexingDone) {
+                    // Stream closed without a done event — redirect anyway
+                    goDone();
+                    setTimeout(() => { window.location.href = '{{ route('admin.documents.index') }}'; }, 800);
+                }
+            };
+        });
+
+        xhr.addEventListener('error', () => {
+            showUploadError('{{ __('Network error during upload.') }}');
+        });
+
+        xhr.open('POST', form.action);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.send(new FormData(form));
+    });
 })();
 
 /* ── Spin keyframe ── */

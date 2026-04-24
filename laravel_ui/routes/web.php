@@ -47,6 +47,7 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
         Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+        Route::get('/documents/reindex-stream', [DocumentController::class, 'reindexStream'])->name('documents.reindexStream');
         Route::get('/documents/consult', [DocumentController::class, 'consult'])->name('documents.consult');
 
         // Admin-only document management

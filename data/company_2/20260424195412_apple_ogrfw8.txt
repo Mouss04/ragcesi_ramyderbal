@@ -1,0 +1,34 @@
+APPLE INC DATASET (RAG TEST)
+
+=== COMPANY OVERVIEW === Apple Inc. is an American multinational
+technology company headquartered in Cupertino, California. Founded:
+April 1, 1976 Founders: Steve Jobs, Steve Wozniak, Ronald Wayne
+
+Core Areas: - Hardware - Software - Services
+
+=== PRODUCTS === iPhone: smartphone using iOS Mac: computers using macOS
+iPad: tablets Apple Watch: smartwatch AirPods: wireless earbuds
+
+=== SOFTWARE === iOS, macOS, iPadOS, watchOS
+
+Services: - iCloud - Apple Music - App Store
+
+=== BUSINESS MODEL === Revenue sources: - Products (75%) - Services
+(25%)
+
+=== SUPPLY CHAIN === Manufacturers: - Foxconn - Pegatron
+
+=== FINANCIAL DATA === Revenue: $394 billion iPhone: $205B Services:
+$78B
+
+=== APPLE SILICON === M1, M2, M3 chips ARM-based architecture High
+efficiency
+
+=== SECURITY === - End-to-end encryption - Secure Enclave - Face ID
+
+=== AI === - Siri - Core ML - Neural Engine
+
+=== COMPETITORS === - Samsung - Google - Microsoft
+
+=== SAMPLE LOGS === [LOG-001] iCloud login success [LOG-002] App
+download started

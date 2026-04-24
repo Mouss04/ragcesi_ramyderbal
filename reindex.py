@@ -19,7 +19,11 @@ def main() -> int:
         vlm_model=vlm_model,
         company_id=company_id,
     )
-    stats = pipeline.build()
+
+    def _progress(pct: int, label: str) -> None:
+        print(f"PROGRESS:{pct}:{label}", flush=True)
+
+    stats = pipeline.build(progress_callback=_progress)
 
     print(
         f"Indexed {stats['chunk_count']} chunks from {stats['document_count']} documents."

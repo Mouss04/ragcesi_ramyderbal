@@ -32,7 +32,7 @@ class DocumentController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         @set_time_limit(300);
 
@@ -77,31 +77,68 @@ class DocumentController extends Controller
 
         $this->syncDataDirectoryRecords($companyId);
 
-        try {
-            $summary = $this->runReindex($companyId);
-        } catch (ProcessFailedException $exception) {
-            $errorOutput = trim($exception->getProcess()->getErrorOutput());
-            $fallbackOutput = trim($exception->getProcess()->getOutput());
+        return response()->json(['ok' => true]);
+    }
 
-            return back()->withErrors([
-                'process' => 'Document uploaded but indexing failed: '.($errorOutput ?: $fallbackOutput),
-            ]);
-        } catch (\RuntimeException $exception) {
-            return back()->withErrors([
-                'process' => 'Document uploaded but indexing failed: '.$exception->getMessage(),
-            ]);
-        }
+    public function reindexStream(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $companyId = (string) $request->user()->company_id;
+        $projectRoot = dirname(base_path());
+        $scriptPath = $projectRoot.'/reindex.py';
 
-        $status = 'Document uploaded and indexed successfully.';
-        if ($summary !== '') {
-            $lines = preg_split('/\R/', $summary) ?: [];
-            $lastLine = trim(end($lines) ?: '');
-            if ($lastLine !== '') {
-                $status .= ' '.$lastLine;
+        $pythonExecutable = file_exists($projectRoot.'/.venv/bin/python')
+            ? $projectRoot.'/.venv/bin/python'
+            : 'python3';
+
+        $env = array_merge($_ENV, [
+            'LMSTUDIO_URL'   => env('LMSTUDIO_URL', 'http://192.168.100.67:1234'),
+            'LMSTUDIO_MODEL' => env('LMSTUDIO_MODEL', 'mistral-7b-instruct-v0.3'),
+            'VLM_URL'        => env('VLM_URL', 'http://192.168.100.67:1234'),
+            'VLM_MODEL'      => env('VLM_MODEL', 'google/gemma-4-e2b'),
+        ]);
+
+        return response()->stream(function () use ($pythonExecutable, $scriptPath, $companyId, $env, $projectRoot) {
+            // Disable all output buffering so SSE events are sent immediately.
+            while (ob_get_level() > 0) {
+                @ob_end_flush();
             }
-        }
+            @ob_implicit_flush(true);
 
-        return back()->with('status', $status);
+            $process = new Process([$pythonExecutable, $scriptPath, $companyId], $projectRoot, $env);
+            $process->setTimeout(300);
+            $process->start();
+
+            while ($process->isRunning()) {
+                $out = $process->getIncrementalOutput();
+                if ($out !== '') {
+                    foreach (explode("\n", $out) as $raw) {
+                        $line = trim($raw);
+                        if ($line === '') {
+                            continue;
+                        }
+                        if (preg_match('/^PROGRESS:(\d+):(\S+)$/', $line, $m)) {
+                            echo 'data: '.json_encode(['pct' => (int) $m[1], 'label' => $m[2]])."\n\n";
+                            flush();
+                        }
+                    }
+                }
+                usleep(80000); // 80 ms
+            }
+
+            if ($process->getExitCode() !== 0) {
+                $err = trim($process->getErrorOutput() ?: $process->getOutput());
+                echo 'data: '.json_encode(['error' => $err])."\n\n";
+            } else {
+                $output = trim($process->getOutput());
+                echo 'data: '.json_encode(['done' => true, 'status' => $output])."\n\n";
+            }
+            flush();
+        }, 200, [
+            'Content-Type'      => 'text/event-stream',
+            'Cache-Control'     => 'no-cache, no-store',
+            'X-Accel-Buffering' => 'no',
+            'Connection'        => 'keep-alive',
+        ]);
     }
 
     public function destroy(Request $request, Document $document): RedirectResponse

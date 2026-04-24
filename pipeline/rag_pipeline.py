@@ -52,12 +52,19 @@ class RAGPipeline:
         except Exception:
             return []
 
-    def build(self) -> dict[str, int]:
+    def build(self, progress_callback=None) -> dict[str, int]:
         """Incrementally index only new documents and return indexing stats.
 
         Files whose source paths are already present in faiss.meta.json are
         skipped entirely — the VLM is never called for them again.
+
+        progress_callback(pct: int, label: str) is called at each major stage.
         """
+        def _report(pct: int, label: str) -> None:
+            if progress_callback:
+                progress_callback(pct, label)
+
+        _report(5, "loading")
         existing_records = self._load_existing_records()
         already_indexed = {rec["source"] for rec in existing_records}
 
@@ -72,15 +79,23 @@ class RAGPipeline:
         documents = [item["text"] for item in all_records]
         sources = [item["source"] for item in all_records]
 
+        _report(30, "cleaning")
         cleaned = self.preprocessor.clean(documents)
+
+        _report(50, "chunking")
         chunks = self.chunker.chunk(cleaned, sources=sources)
 
         if len(chunks) == 0:
             raise ValueError("No chunks available. Add files in data/ first.")
 
+        _report(70, "embedding")
         vectors = self.embedder.embed_texts(chunks)
+
+        _report(90, "saving")
         self.vector_store.add_embeddings(vectors, documents=chunks)
         self.vector_store.save_index(self.index_path, self.meta_path)
+
+        _report(100, "done")
         return {
             "document_count": len(all_records),
             "chunk_count": len(chunks),
