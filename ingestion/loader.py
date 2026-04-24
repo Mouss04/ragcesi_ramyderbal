@@ -1,5 +1,4 @@
 import base64
-import io
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -37,11 +36,24 @@ class DocumentIngestor:
         """Return raw text documents found in the data directory."""
         return [item["text"] for item in self.load_document_records()]
 
-    def load_document_records(self) -> List[Dict[str, str]]:
-        """Return documents with both source path and text."""
+    def load_document_records(
+        self, skip_sources: Optional[set] = None
+    ) -> List[Dict[str, str]]:
+        """Return documents with both source path and text.
+
+        Parameters
+        ----------
+        skip_sources:
+            Set of source path strings to skip (already indexed). Passing this
+            avoids re-processing files — and re-calling the VLM — for documents
+            that have not changed.
+        """
+        skip = skip_sources or set()
         documents: List[Dict[str, str]] = []
         for path in self.data_dir.glob("**/*"):
             if not path.is_file():
+                continue
+            if str(path) in skip:
                 continue
 
             text = self._read_supported_file(path)
@@ -64,32 +76,67 @@ class DocumentIngestor:
         return ""
 
     def _read_pdf(self, path: Path) -> str:
-        """Extract text from all pages of a PDF file.
+        """Extract text from a PDF.
 
-        For image-based (scanned) PDFs where pypdf finds no text, each page is
-        rendered to a PNG image in memory and described by the VLM.
+        For each page:
+        - Text is extracted via pypdf.
+        - If the page also contains embedded images, the page is rendered and
+          described by the VLM so image content is not lost.
+        - If a page has no text at all (scanned page), it is described by the VLM.
         """
         try:
             reader = PdfReader(str(path))
-            pages = [page.extract_text() or "" for page in reader.pages]
-            text = "\n".join(pages).strip()
-            if text:
-                return text
+            pypdf_pages = [page.extract_text() or "" for page in reader.pages]
         except Exception:
-            pass
+            pypdf_pages = []
 
-        # Fallback: render pages with pymupdf and describe each via the VLM.
-        return self._describe_pdf_as_images(path)
+        # If pypdf failed entirely, fall back to full VLM rendering.
+        if not pypdf_pages:
+            return self._describe_pdf_as_images(path)
+
+        try:
+            doc = fitz.open(str(path))
+            page_parts: list[str] = []
+            for page_num, (fitz_page, page_text) in enumerate(
+                zip(doc, pypdf_pages), start=1
+            ):
+                parts: list[str] = []
+                if page_text.strip():
+                    parts.append(page_text.strip())
+
+                # Check whether this page contains any raster images.
+                has_images = bool(fitz_page.get_images(full=False))
+                if has_images:
+                    pix = fitz_page.get_pixmap(dpi=150)
+                    b64 = base64.b64encode(pix.tobytes("png")).decode("utf-8")
+                    img_description = self._describe_pdf_page_b64(b64, page_num)
+                    if img_description:
+                        parts.append(f"[Image description] {img_description}")
+
+                # Scanned page: no text, no detected images vector — render anyway.
+                if not parts:
+                    pix = fitz_page.get_pixmap(dpi=150)
+                    b64 = base64.b64encode(pix.tobytes("png")).decode("utf-8")
+                    description = self._describe_pdf_page_b64(b64, page_num)
+                    if description:
+                        parts.append(description)
+
+                if parts:
+                    page_parts.append(f"[Page {page_num}] " + "\n".join(parts))
+
+            return "\n\n".join(page_parts).strip()
+        except Exception:
+            # pymupdf unavailable — plain text only.
+            return "\n".join(pypdf_pages).strip()
 
     def _describe_pdf_as_images(self, path: Path) -> str:
-        """Render each PDF page as a PNG and run it through the VLM describer."""
+        """Render each page of a scanned PDF as PNG and describe via VLM."""
         try:
             doc = fitz.open(str(path))
             descriptions: list[str] = []
             for page_num, page in enumerate(doc, start=1):
                 pix = page.get_pixmap(dpi=150)
                 png_bytes = pix.tobytes("png")
-                # Build a temporary in-memory Path-like object the VLM can encode.
                 b64 = base64.b64encode(png_bytes).decode("utf-8")
                 description = self._describe_pdf_page_b64(b64, page_num)
                 if description:

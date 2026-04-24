@@ -1,4 +1,6 @@
+import json
 import os
+from pathlib import Path
 from typing import Optional
 
 from ingestion.loader import DocumentIngestor
@@ -39,11 +41,36 @@ class RAGPipeline:
         self.index_path = os.path.join(data_dir, "faiss.index")
         self.meta_path = os.path.join(data_dir, "faiss.meta.json")
 
+    def _load_existing_records(self) -> list[dict]:
+        """Return records already stored in faiss.meta.json, or [] if none."""
+        meta = Path(self.meta_path)
+        if not meta.exists():
+            return []
+        try:
+            data = json.loads(meta.read_text(encoding="utf-8"))
+            return data.get("documents", [])
+        except Exception:
+            return []
+
     def build(self) -> dict[str, int]:
-        """Load, clean, chunk and index documents and return indexing stats."""
-        records = self.ingestor.load_document_records()
-        documents = [item["text"] for item in records]
-        sources = [item["source"] for item in records]
+        """Incrementally index only new documents and return indexing stats.
+
+        Files whose source paths are already present in faiss.meta.json are
+        skipped entirely — the VLM is never called for them again.
+        """
+        existing_records = self._load_existing_records()
+        already_indexed = {rec["source"] for rec in existing_records}
+
+        new_records = self.ingestor.load_document_records(skip_sources=already_indexed)
+
+        # Combine existing + new so the full index stays coherent.
+        all_records = existing_records + new_records
+
+        if not all_records:
+            raise ValueError("No chunks available. Add files in data/ first.")
+
+        documents = [item["text"] for item in all_records]
+        sources = [item["source"] for item in all_records]
 
         cleaned = self.preprocessor.clean(documents)
         chunks = self.chunker.chunk(cleaned, sources=sources)
@@ -55,7 +82,7 @@ class RAGPipeline:
         self.vector_store.add_embeddings(vectors, documents=chunks)
         self.vector_store.save_index(self.index_path, self.meta_path)
         return {
-            "document_count": len(records),
+            "document_count": len(all_records),
             "chunk_count": len(chunks),
         }
 
