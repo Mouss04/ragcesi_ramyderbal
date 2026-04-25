@@ -56,10 +56,10 @@ class LLMClient:
                         "Rules:\n"
                         "- IMPORTANT: Always respond in the same language as the question. "
                         "If the question is in French, answer in French. If in English, answer in English.\n"
-                        "- Be accurate and complete: include all relevant details from the context.\n"
+                        "- Be concise and direct: give a short, focused answer. No long introductions or conclusions.\n"
+                        "- Use bullet points or a short paragraph — maximum 5 sentences.\n"
                         "- Cite sources inline when useful, e.g. (Source 1).\n"
-                        "- If multiple passages contain complementary information, synthesize them.\n"
-                        "- If the context does not contain enough information to answer, say so briefly "
+                        "- If the context does not contain enough information to answer, say so in one sentence "
                         "in the same language as the question.\n"
                         "- Do NOT invent facts beyond what is stated in the context.\n\n"
                         f"Question: {query}\n\n"
@@ -69,7 +69,7 @@ class LLMClient:
                 },
             ],
             "temperature": 0.1,
-            "max_tokens": 512,
+            "max_tokens": 256,
         }
 
         response = requests.post(

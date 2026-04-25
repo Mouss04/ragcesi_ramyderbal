@@ -5,18 +5,22 @@ from pipeline.rag_pipeline import RAGPipeline
 
 
 def main() -> int:
-    company_id = sys.argv[1].strip() if len(sys.argv) > 1 else None
+    args = sys.argv[1:]
+    text_only = "--text-only" in args
+    positional = [a for a in args if not a.startswith("--")]
+    company_id = positional[0].strip() if positional else None
 
     lmstudio_url = os.getenv("LMSTUDIO_URL", "http://192.168.100.67:1234")
     model_name = os.getenv("LMSTUDIO_MODEL", "mistral")
-    vlm_url = os.getenv("VLM_URL", "http://192.168.100.67:1234")
-    vlm_model = os.getenv("VLM_MODEL", "google/gemma-4-e2b")
+    vlm_url = None if text_only else os.getenv("VLM_URL", "http://192.168.100.67:1234")
+    vlm_model = None if text_only else os.getenv("VLM_MODEL", "google/gemma-4-e2b")
 
     pipeline = RAGPipeline(
         lmstudio_url=lmstudio_url,
         model_name=model_name,
         vlm_url=vlm_url,
         vlm_model=vlm_model,
+        text_only=text_only,
         company_id=company_id,
     )
 

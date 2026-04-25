@@ -21,6 +21,7 @@ class RAGPipeline:
         model_name: str = "mistral",
         vlm_url: Optional[str] = None,
         vlm_model: Optional[str] = None,
+        text_only: bool = False,
         company_id: Optional[str] = None,
     ) -> None:
         # Per-company data directory keeps each tenant's documents isolated.
@@ -29,7 +30,7 @@ class RAGPipeline:
         else:
             data_dir = "data"
 
-        self.ingestor = DocumentIngestor(data_dir=data_dir, vlm_url=vlm_url, vlm_model=vlm_model)
+        self.ingestor = DocumentIngestor(data_dir=data_dir, vlm_url=vlm_url, vlm_model=vlm_model, text_only=text_only)
         self.preprocessor = TextPreprocessor()
         self.chunker = TextChunker()
         self.embedder = EmbeddingGenerator()

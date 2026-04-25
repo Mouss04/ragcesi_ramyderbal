@@ -18,7 +18,7 @@ import os
 import sys
 from pathlib import Path
 
-from ingestion.image_processor import VLMImageProcessor
+from ingestion.image_processor import ImageTooBlurryError, VLMImageProcessor
 
 
 def main() -> int:
@@ -36,9 +36,21 @@ def main() -> int:
 
     try:
         processor = VLMImageProcessor(base_url=vlm_url, model=vlm_model)
+
+        # Ask the VLM whether the image is blurry anywhere (including corners/edges).
+        processor.check_blur_with_vlm(image_path)
+
         description = processor.describe(image_path)
+
+        # Fallback: if the VLM's own description mentions blur/noise, reject the image.
+        if VLMImageProcessor.description_has_blur(description):
+            raise ImageTooBlurryError()
+
         print(json.dumps({"description": description}))
         return 0
+    except ImageTooBlurryError as exc:
+        print(json.dumps({"error": str(exc), "blurry": True}))
+        return 2  # distinct exit code: blurry image
     except Exception as exc:  # noqa: BLE001
         print(json.dumps({"error": str(exc)}))
         return 1

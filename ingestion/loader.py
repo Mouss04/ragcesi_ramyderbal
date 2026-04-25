@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 import fitz  # pymupdf
 from pypdf import PdfReader
 
-from ingestion.image_processor import VLMImageProcessor
+from ingestion.image_processor import ImageTooBlurryError, VLMImageProcessor
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 
@@ -19,8 +19,10 @@ class DocumentIngestor:
         data_dir: str = "data",
         vlm_url: Optional[str] = None,
         vlm_model: Optional[str] = None,
+        text_only: bool = False,
     ) -> None:
         self.data_dir = Path(data_dir)
+        self.text_only = text_only
         self._vlm_url = vlm_url or os.getenv("VLM_URL", VLMImageProcessor.DEFAULT_VLM_URL)
         self._vlm_model = vlm_model or os.getenv("VLM_MODEL", VLMImageProcessor.DEFAULT_VLM_MODEL)
         self._vlm: Optional[VLMImageProcessor] = None
@@ -69,6 +71,8 @@ class DocumentIngestor:
         suffix = path.suffix.lower()
         if suffix in {".txt", ".md"}:
             return path.read_text(encoding="utf-8", errors="ignore").strip()
+        if self.text_only:
+            return ""
         if suffix == ".pdf":
             return self._read_pdf(path)
         if suffix in IMAGE_EXTENSIONS:
@@ -184,7 +188,12 @@ class DocumentIngestor:
     def _describe_image(self, path: Path) -> str:
         """Use the VLM to generate a text description of the image."""
         try:
-            return self.vlm.describe(path)
+            self.vlm.check_blur_with_vlm(path)
+            description = self.vlm.describe(path)
+            # Fallback: if the VLM's own description mentions blur/noise, reject the image.
+            if VLMImageProcessor.description_has_blur(description):
+                raise ImageTooBlurryError()
+            return description
         except Exception:
-            # Skip images that cannot be processed so ingestion can continue.
+            # Skip images that cannot be processed (blurry or VLM error) so ingestion can continue.
             return ""

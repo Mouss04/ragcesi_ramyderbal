@@ -62,6 +62,16 @@ class DocumentController extends Controller
         if ($isImage) {
             try {
                 $description = $this->describeImage($targetDir.'/'.$filename, $projectRoot);
+            } catch (\RuntimeException $e) {
+                if ($e->getCode() === 2) {
+                    // Blurry image: remove the uploaded file and reject the request.
+                    @unlink($targetDir.'/'.$filename);
+                    return response()->json([
+                        'message' => $e->getMessage(),
+                        'errors'  => ['file' => [$e->getMessage()]],
+                    ], 422);
+                }
+                $description = null;
             } catch (\Throwable) {
                 $description = null;
             }
@@ -76,6 +86,12 @@ class DocumentController extends Controller
         ]);
 
         $this->syncDataDirectoryRecords($companyId);
+
+        try {
+            $this->runReindex($companyId);
+        } catch (\Throwable) {
+            // Index build failure does not block the upload — it will be rebuilt on next query.
+        }
 
         return response()->json(['ok' => true]);
     }
@@ -226,8 +242,9 @@ class DocumentController extends Controller
             : 'python3';
 
         $env = array_merge($_ENV, [
-            'VLM_URL'   => env('VLM_URL', 'http://192.168.100.67:1234'),
-            'VLM_MODEL' => env('VLM_MODEL', 'google/gemma-4-e2b'),
+            'VLM_URL'        => env('VLM_URL', 'http://192.168.100.67:1234'),
+            'VLM_MODEL'      => env('VLM_MODEL', 'google/gemma-4-e2b'),
+            'BLUR_THRESHOLD' => env('BLUR_THRESHOLD', '100.0'),
         ]);
 
         $process = new Process([$pythonExecutable, $scriptPath, $absoluteImagePath], $projectRoot, $env);
@@ -235,6 +252,16 @@ class DocumentController extends Controller
         $process->run();
 
         $output = trim($process->getOutput());
+
+        // Exit code 2 means the blur check failed — image is too blurry for OCR.
+        if ($process->getExitCode() === 2) {
+            $decoded = json_decode($output, true);
+            $msg = is_array($decoded) && isset($decoded['error'])
+                ? $decoded['error']
+                : "L'image téléversée est trop floue pour être traitée. Veuillez téléverser une version plus nette.";
+            throw new \RuntimeException($msg, 2);
+        }
+
         if ($output === '') {
             return null;
         }

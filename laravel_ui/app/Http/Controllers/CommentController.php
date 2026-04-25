@@ -222,7 +222,7 @@ class CommentController extends Controller
         ]);
 
         try {
-            $process = new Process([$pythonExecutable, $scriptPath, $companyId], $projectRoot, $env);
+            $process = new Process([$pythonExecutable, $scriptPath, '--text-only', $companyId], $projectRoot, $env);
             $process->setTimeout(null);
             $process->run(); // wait for full completion — time limit already removed above
         } catch (\Throwable) {
