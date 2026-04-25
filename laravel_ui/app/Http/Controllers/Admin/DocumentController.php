@@ -87,12 +87,7 @@ class DocumentController extends Controller
 
         $this->syncDataDirectoryRecords($companyId);
 
-        try {
-            $this->runReindex($companyId);
-        } catch (\Throwable) {
-            // Index build failure does not block the upload — it will be rebuilt on next query.
-        }
-
+        // Reindexing is handled by the SSE stream opened by the frontend immediately after this response.
         return response()->json(['ok' => true]);
     }
 
@@ -114,6 +109,11 @@ class DocumentController extends Controller
         ]);
 
         return response()->stream(function () use ($pythonExecutable, $scriptPath, $companyId, $env, $projectRoot) {
+            // Keep PHP alive even if the browser disconnects — critical so the
+            // Python child process is not killed before it can save faiss.index.
+            ignore_user_abort(true);
+            set_time_limit(0);
+
             // Disable all output buffering so SSE events are sent immediately.
             while (ob_get_level() > 0) {
                 @ob_end_flush();
@@ -121,12 +121,14 @@ class DocumentController extends Controller
             @ob_implicit_flush(true);
 
             $process = new Process([$pythonExecutable, $scriptPath, $companyId], $projectRoot, $env);
-            $process->setTimeout(300);
+            $process->setTimeout(null); // No timeout — PDF+VLM ingestion can take many minutes.
             $process->start();
 
+            $ticks = 0; // counter used to emit a keepalive comment every ~8 s
             while ($process->isRunning()) {
                 $out = $process->getIncrementalOutput();
                 if ($out !== '') {
+                    $ticks = 0;
                     foreach (explode("\n", $out) as $raw) {
                         $line = trim($raw);
                         if ($line === '') {
@@ -134,8 +136,17 @@ class DocumentController extends Controller
                         }
                         if (preg_match('/^PROGRESS:(\d+):(\S+)$/', $line, $m)) {
                             echo 'data: '.json_encode(['pct' => (int) $m[1], 'label' => $m[2]])."\n\n";
-                            flush();
+                            @flush();
                         }
+                    }
+                } else {
+                    $ticks++;
+                    // Every ~8 s (100 × 80 ms) send an SSE comment to keep the
+                    // connection alive through proxies and browser idle timers.
+                    if ($ticks >= 100) {
+                        echo ": keepalive\n\n";
+                        @flush();
+                        $ticks = 0;
                     }
                 }
                 usleep(80000); // 80 ms
@@ -148,7 +159,7 @@ class DocumentController extends Controller
                 $output = trim($process->getOutput());
                 echo 'data: '.json_encode(['done' => true, 'status' => $output])."\n\n";
             }
-            flush();
+            @flush();
         }, 200, [
             'Content-Type'      => 'text/event-stream',
             'Cache-Control'     => 'no-cache, no-store',

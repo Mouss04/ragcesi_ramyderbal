@@ -6,15 +6,37 @@ import requests
 
 
 class ImageTooBlurryError(Exception):
-    """Raised when an image is detected as blurry and cannot be reliably processed."""
+    """Raised when an image fails any quality check (blur, resolution, repetitive content)."""
 
-    def __init__(self, variance: float = 0.0, threshold: float = 0.0) -> None:
-        self.variance = variance
-        self.threshold = threshold
-        super().__init__(
+    _MESSAGES: dict = {
+        "blurry": (
             "L'image téléversée est trop floue pour être traitée. "
             "Veuillez téléverser une version plus nette."
-        )
+        ),
+        "low_resolution": (
+            "L'image téléversée a une résolution trop faible. "
+            "Veuillez téléverser une image d'au moins 100 × 100 pixels."
+        ),
+        "repetitive": (
+            "L'image téléversée ne contient pas de contenu analysable de façon fiable. "
+            "Veuillez téléverser une image claire avec un contenu lisible et non répétitif."
+        ),
+        "low_information": (
+            "L'image téléversée semble vide ou ne contient pas d'information utile. "
+            "Veuillez téléverser une image avec un contenu visible."
+        ),
+    }
+
+    def __init__(
+        self,
+        variance: float = 0.0,
+        threshold: float = 0.0,
+        reason: str = "blurry",
+    ) -> None:
+        self.variance = variance
+        self.threshold = threshold
+        self.reason = reason
+        super().__init__(self._MESSAGES.get(reason, self._MESSAGES["blurry"]))
 
 
 class VLMImageProcessor:
@@ -83,7 +105,68 @@ class VLMImageProcessor:
         )
         variance = float(np.var(lap))
         if variance < threshold:
-            raise ImageTooBlurryError(variance, threshold)
+            raise ImageTooBlurryError(variance, threshold, reason="blurry")
+
+    @staticmethod
+    def check_resolution(path: Path, min_pixels: int = 10_000) -> None:
+        """Reject images whose total pixel count is below *min_pixels*.
+
+        Very small images (e.g. thumbnails, icons) cannot contain enough
+        information for reliable VLM description and should be rejected early.
+        Raises :class:`ImageTooBlurryError` with reason ``"low_resolution"``.
+        """
+        from PIL import Image  # type: ignore[import-untyped]
+
+        with Image.open(path) as img:
+            w, h = img.size
+        if w * h < min_pixels:
+            raise ImageTooBlurryError(
+                variance=float(w * h),
+                threshold=float(min_pixels),
+                reason="low_resolution",
+            )
+
+    @staticmethod
+    def description_is_repetitive(
+        description: str,
+        max_repeat_ratio: float = 0.35,
+        min_sentences: int = 5,
+        max_absolute_repeats: int = 3,
+    ) -> bool:
+        """Return True if *description* contains heavily repeated content.
+
+        This detects VLM hallucination loops where the model emits the same
+        sentence (or near-identical phrasing) over and over, which happens when
+        the source image contains unreadable, fake, or Lorem-ipsum-style text.
+
+        Detection strategy:
+        - Split the description into sentences (on .!? boundaries).
+        - Ignore very short fragments (< 25 chars) to avoid false positives
+          from short repeated words like "Moreover".
+        - If any single sentence appears more than *max_absolute_repeats* times
+          → repetitive.
+        - If the most-common sentence accounts for > *max_repeat_ratio* of all
+          sentences → repetitive.
+        """
+        import re
+        from collections import Counter
+
+        sentences = [
+            s.strip()
+            for s in re.split(r"[.!?]+", description)
+            if len(s.strip()) >= 25
+        ]
+        if len(sentences) < min_sentences:
+            return False
+
+        counts = Counter(sentences)
+        top_sentence, top_count = counts.most_common(1)[0]
+
+        if top_count > max_absolute_repeats:
+            return True
+        if top_count / len(sentences) > max_repeat_ratio:
+            return True
+        return False
 
     def check_blur_with_vlm(self, path: Path) -> None:
         """Ask the VLM whether the image contains any blurry or out-of-focus area.
@@ -127,7 +210,7 @@ class VLMImageProcessor:
         answer = data["choices"][0]["message"]["content"].strip().upper()
 
         if "YES" in answer:
-            raise ImageTooBlurryError()
+            raise ImageTooBlurryError(reason="blurry")
 
     def _resolve_model(self) -> str:
         """Return the loaded VLM model id, falling back to the configured one."""

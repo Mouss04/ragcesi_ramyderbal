@@ -841,8 +841,16 @@
 
             {{-- ── Notification bell ── --}}
             @php
-                $unreadNotifications = auth()->user()->unreadNotifications->take(15);
-                $unreadCount         = auth()->user()->unreadNotifications->count();
+                $allUnread       = auth()->user()->unreadNotifications;
+                $pendingIds      = \App\Models\Comment::where('status', 'PENDING')->pluck('id')->flip()->all();
+                $unreadNotifications = $allUnread->filter(fn($n) => isset($pendingIds[$n->data['comment_id'] ?? null]));
+                $unreadCount         = $unreadNotifications->count();
+                // Auto-dismiss notifications for comments that are no longer pending
+                $staleIds = $allUnread->filter(fn($n) => !isset($pendingIds[$n->data['comment_id'] ?? null]))->pluck('id')->all();
+                if (!empty($staleIds)) {
+                    \DB::table('notifications')->whereIn('id', $staleIds)->update(['read_at' => now()]);
+                }
+                $unreadNotifications = $unreadNotifications->take(15);
             @endphp
             <div class="notif-wrap">
                 <button class="notif-btn {{ $unreadCount > 0 ? 'has-notif' : '' }}" id="notifBtn" aria-label="{{ __('Notifications') }}">

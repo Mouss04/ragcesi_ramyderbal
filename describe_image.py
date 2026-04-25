@@ -33,18 +33,31 @@ def main() -> int:
 
     vlm_url = os.getenv("VLM_URL", "http://192.168.100.67:1234")
     vlm_model = os.getenv("VLM_MODEL", "google/gemma-4-e2b")
+    blur_threshold = float(os.getenv("BLUR_THRESHOLD", "500.0"))
+    min_pixels = int(os.getenv("MIN_IMAGE_PIXELS", "10000"))
 
     try:
         processor = VLMImageProcessor(base_url=vlm_url, model=vlm_model)
 
-        # Ask the VLM whether the image is blurry anywhere (including corners/edges).
+        # 1. Minimum resolution — reject tiny/thumbnail images immediately.
+        VLMImageProcessor.check_resolution(image_path, min_pixels=min_pixels)
+
+        # 2. Laplacian sharpness — fast CPU-only blur detection.
+        VLMImageProcessor.check_blur(image_path, threshold=blur_threshold)
+
+        # 3. VLM-based blur check — catches partial/edge blur the Laplacian misses.
         processor.check_blur_with_vlm(image_path)
 
         description = processor.describe(image_path)
 
-        # Fallback: if the VLM's own description mentions blur/noise, reject the image.
+        # 4. Repetition guard — detect VLM hallucination loops caused by
+        #    garbled, Lorem-ipsum-style, or otherwise unreadable image content.
+        if VLMImageProcessor.description_is_repetitive(description):
+            raise ImageTooBlurryError(reason="repetitive")
+
+        # 5. Blur-keyword fallback — if the VLM's own description mentions blur/noise.
         if VLMImageProcessor.description_has_blur(description):
-            raise ImageTooBlurryError()
+            raise ImageTooBlurryError(reason="blurry")
 
         print(json.dumps({"description": description}))
         return 0

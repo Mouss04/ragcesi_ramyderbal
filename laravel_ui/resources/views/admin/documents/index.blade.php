@@ -132,8 +132,13 @@
     background:#e8f7f7; border-radius:8px;
     padding:.4rem .7rem; font-size:.78rem; font-weight:600;
     color:var(--teal); align-items:center; gap:.4rem;
+    max-width:100%; overflow:hidden;
 }
-.doc-dropzone-file.show { display:inline-flex; }
+.doc-dropzone-file.show { display:inline-flex; max-width:100%; }
+.doc-dropzone-file span {
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    min-width:0;
+}
 
 /* Upload button */
 .doc-upload-btn {
@@ -723,9 +728,11 @@ if (dropZone) {
             es.onerror = () => {
                 es.close();
                 if (!indexingDone) {
-                    // Stream closed without a done event — redirect anyway
-                    goDone();
-                    setTimeout(() => { window.location.href = '{{ route('admin.documents.index') }}'; }, 800);
+                    // The SSE connection dropped before the server sent "done".
+                    // The Python process keeps running in the background (PHP runs
+                    // with ignore_user_abort=true), so the index WILL be saved.
+                    // Ask the user to wait and refresh rather than faking success.
+                    showUploadError('{{ __('The connection was interrupted, but indexing is still running in the background. Please wait a moment then refresh this page.') }}');
                 }
             };
         });

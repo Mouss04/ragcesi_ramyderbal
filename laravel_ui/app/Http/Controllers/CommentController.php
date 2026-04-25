@@ -173,15 +173,20 @@ class CommentController extends Controller
     }
 
     /**
-     * Mark all unread notifications for a given comment as read and return their IDs.
+     * Mark all unread notifications for a given comment as read for ALL users and return their IDs.
      */
     private function dismissNotificationsForComment($user, int $commentId): array
     {
-        $notifications = $user->unreadNotifications
-            ->filter(fn ($n) => ($n->data['comment_id'] ?? null) == $commentId);
+        $ids = \DB::table('notifications')
+            ->whereNull('read_at')
+            ->where('type', \App\Notifications\NewCommentNotification::class)
+            ->where('data', 'like', '%"comment_id":' . $commentId . '%')
+            ->pluck('id')
+            ->all();
 
-        $ids = $notifications->pluck('id')->all();
-        $notifications->each->markAsRead();
+        \DB::table('notifications')
+            ->whereIn('id', $ids)
+            ->update(['read_at' => now()]);
 
         return $ids;
     }

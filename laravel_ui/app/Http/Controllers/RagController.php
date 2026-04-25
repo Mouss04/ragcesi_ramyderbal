@@ -48,7 +48,7 @@ class RagController extends Controller
             $companyId,
         ], $projectRoot);
 
-        $process->setTimeout(180);
+        $process->setTimeout(600);
 
         try {
             $process->mustRun();
